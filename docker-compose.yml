@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres_agent_db
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./data/postgres/postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+
+  redis:
+    image: redis:latest
+    container_name: redis_agent
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./data/redis/data:/data
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bot_agent
+    depends_on:
+      - postgres
+      - redis
+      - fastapi
+    volumes:
+      - ./data/images:/app/images
+    restart: unless-stopped
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile_fastapi
+    container_name: fastapi_agent
+    ports:
+      - "8001:8000"
+    depends_on:
+      - postgres
+      - redis
+

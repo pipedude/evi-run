@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the latest two tags
+        CURRENT_TAG=${GITHUB_REF#refs/tags/}
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+        echo "current_tag=$CURRENT_TAG" >> $GITHUB_OUTPUT
+        
+        # Generate changelog
+        if [ -n "$PREVIOUS_TAG" ]; then
+          echo "## What's Changed" > CHANGELOG.tmp
+          git log --pretty=format:"* %s (%h)" $PREVIOUS_TAG..$CURRENT_TAG >> CHANGELOG.tmp
+        else
+          echo "## What's Changed" > CHANGELOG.tmp
+          echo "* Initial release" >> CHANGELOG.tmp
+        fi
+        
+        # Read changelog into output
+        {
+          echo 'CHANGELOG<<EOF'
+          cat CHANGELOG.tmp
+          echo 'EOF'
+        } >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.changelog.outputs.current_tag }}
+        name: evi.run ${{ steps.changelog.outputs.current_tag }}
+        body: |
+          🚀 **evi.run Release ${{ steps.changelog.outputs.current_tag }}**
+          
+          ${{ steps.changelog.outputs.CHANGELOG }}
+          
+          ## 📦 Installation
+          
+          ```bash
+          # Quick install with Docker
+          git clone https://github.com/${{ github.repository }}.git
+          cd evi-run
+          cp .env.example .env
+          # Edit .env with your credentials
+          chmod +x docker_setup_en.sh
+          ./docker_setup_en.sh
+          docker compose up --build -d
+          ```
+          
+          ## 🔗 Useful Links
+          - 📚 [Documentation](https://github.com/${{ github.repository }}/blob/main/README.md)
+          - 🤝 [Contributing](https://github.com/${{ github.repository }}/blob/main/CONTRIBUTING.md)
+          - 💬 [Support](https://t.me/playa3000)
+          
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.changelog.outputs.previous_tag }}...${{ steps.changelog.outputs.current_tag }}
+        draft: false
+        prerelease: false
+
+  docker-release:
+    needs: create-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract version from tag
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Build and push release image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ghcr.io/${{ github.repository }}:latest
+          ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+        labels: |
+          org.opencontainers.image.title=evi.run
+          org.opencontainers.image.description=Customizable Multi-Agent AI System
+          org.opencontainers.image.version=${{ steps.version.outputs.version }}
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
