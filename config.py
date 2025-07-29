@@ -3,7 +3,7 @@
 # =============================================================================
 
 # REQUIRED! Enter your Telegram ID (get from @userinfobot)
-ADMIN_ID = XXX
+ADMIN_ID = 1234567890
 
 # Bot usage mode: 'private' (owner only), 'free' (public with limits), 'pay' (monetized)
 TYPE_USAGE = 'private'
