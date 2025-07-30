@@ -10,7 +10,6 @@
 
 [![Python CI](https://github.com/pipedude/evi-run/workflows/Python%20CI/badge.svg)](https://github.com/pipedude/evi-run/actions)
 [![Docker Build](https://github.com/pipedude/evi-run/workflows/Docker%20Build%20&%20Publish/badge.svg)](https://github.com/pipedude/evi-run/actions)
-[![Release](https://github.com/pipedude/evi-run/workflows/Release/badge.svg)](https://github.com/pipedude/evi-run/actions)
 
 **Ready-to-use customizable multi-agent AI system that combines plug-and-play simplicity with framework-level flexibility**
 
