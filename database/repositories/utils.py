@@ -62,8 +62,8 @@ class UtilsRepository:
     async def update_tokens_daily(self):
         await self.session.execute(update(User).where(and_(User.telegram_id != ADMIN_ID,
                                                            User.balance_credits < CREDITS_USER_DAILY)
-                                                      ).values(balance_credits=CREDITS_ADMIN_DAILY))
+                                                      ).values(balance_credits=CREDITS_USER_DAILY))
         await self.session.execute(update(User).where(and_(User.telegram_id == ADMIN_ID,
                                                            User.balance_credits < CREDITS_USER_DAILY)
-                                                      ).values(balance_credits=CREDITS_USER_DAILY))
+                                                      ).values(balance_credits=CREDITS_ADMIN_DAILY))
         await self.session.commit()
