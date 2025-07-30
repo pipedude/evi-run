@@ -36,7 +36,7 @@
 ## 🎯 Features
 
 ### 🧠 Core AI Capabilities
-- **Memory Management** - Persistent context and learning
+- **Memory Management** - Context control and deep memory
 - **Knowledge Integration** - Dynamic knowledge base expansion
 - **Document Processing** - Handle PDFs, images, and various file formats
 - **Deep Research** - Multi-step investigation and analysis
