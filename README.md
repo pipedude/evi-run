@@ -187,13 +187,6 @@ TELEGRAM_BOT_TOKEN=your_bot_token_here
 
 # REQUIRED: OpenAI API Key
 API_KEY_OPENAI=your_openai_api_key
-
-# Payment Integration (for 'pay' mode)
-TOKEN_BURN_ADDRESS=your_burn_address
-MINT_TOKEN_ADDRESS=your_token_address
-TON_ADDRESS=your_ton_address
-API_KEY_TON=your_tonapi_key
-ADDRESS_SOL=your_sol_address
 ```
 
 #### `config.py` - System Settings
@@ -203,14 +196,6 @@ ADMIN_ID = 123456789
 
 # Usage Mode: 'private', 'free', or 'pay'
 TYPE_USAGE = 'private'
-
-# Credit System (for 'pay' mode)
-CREDITS_USER_DAILY = 20
-CREDITS_ADMIN_DAILY = 50
-
-# Language Support
-AVAILABLE_LANGUAGES = ['en', 'ru']
-DEFAULT_LANGUAGE = 'en'
 ```
 
 ### Usage Modes Explained
