@@ -1,6 +1,6 @@
-# Contributing to evi.run
+# Contributing to evi-run
 
-Thank you for your interest in contributing to **evi.run**! We welcome contributions from the community.
+Thank you for your interest in contributing to **evi-run**! We welcome contributions from the community.
 
 ## 🚀 Quick Start
 
@@ -96,4 +96,4 @@ python -m pytest --cov=bot
 
 ---
 
-**Thank you for contributing to evi.run! 🚀**
+**Thank you for contributing to evi-run! 🚀**

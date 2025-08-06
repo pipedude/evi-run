@@ -1,8 +1,8 @@
-# 🤖 evi.run - Customizable Multi-Agent AI System
+# 😈 evi-run — Customizable Multi-Agent AI System
 
 <div align="center">
 
-![evi.run Logo](https://img.shields.io/badge/evi-run-blue?style=flat-square&logo=robot&logoColor=white)
+[![evi-run](https://img.shields.io/badge/evi-run-blue?style=flat-square&logo=rocket&logoColor=white)](https://github.com/pipedude/evi-run)
 [![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/OpenAI-Agents_SDK-green?style=flat-square&logo=openai&logoColor=white)](https://openai.github.io/openai-agents-python/)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot_API-blue?style=flat-square&logo=telegram&logoColor=white)](https://core.telegram.org/bots/api)
@@ -19,9 +19,9 @@
 
 ---
 
-## 🌟 What is evi.run?
+## 🌟 What is evi-run?
 
-**evi.run** is a powerful, production-ready multi-agent AI system that bridges the gap between out-of-the-box solutions and custom AI frameworks. Built on Python with OpenAI Agents SDK integration, it delivers enterprise-grade AI capabilities through an intuitive Telegram bot interface.
+**evi-run** is a powerful, production-ready multi-agent AI system that bridges the gap between out-of-the-box solutions and custom AI frameworks. Built on Python with OpenAI Agents SDK integration, it delivers enterprise-grade AI capabilities through an intuitive Telegram bot interface.
 
 ### ✨ Key Advantages
 
@@ -35,17 +35,17 @@
 
 ## 🎯 Features
 
-### 🧠 Core AI Capabilities
-- **Memory Management** - Context control and deep memory
+### 🔮 Core AI Capabilities
+- **Memory Management** - Context control and long-term memory
 - **Knowledge Integration** - Dynamic knowledge base expansion
 - **Document Processing** - Handle PDFs, images, and various file formats
 - **Deep Research** - Multi-step investigation and analysis
 - **Web Intelligence** - Smart internet search and data extraction
 - **Image Generation** - AI-powered visual content creation
 
-### 🔐 Advanced Features
+### 🦄 Advanced AI Features
 - **DEX Analytics** - Real-time decentralized exchange monitoring
-- **Token Trading** - Automated DEX trading capabilities
+- **Token Swap** - Easy, fast and secure token swap
 - **Multi-Agent Orchestration** - Complex task decomposition and execution
 - **Custom Agent Creation** - Build specialized AI agents for specific tasks
 
@@ -53,6 +53,11 @@
 - **Private Mode** - Personal use for bot owner only
 - **Free Mode** - Public access with configurable usage limits
 - **Pay Mode** - Monetized system with balance management and payments
+
+### ⏳ Under Development
+- **NSFW Mode** - Unrestricted topic exploration and content generation
+- **Task Scheduler** - Automated agent task planning and execution
+- **Automatic Limit Orders** - Smart trading with automated take-profit and stop-loss functionality
 
 ---
 
@@ -73,7 +78,7 @@
 
 ## 🚀 Quick Installation
 
-Get evi.run running in under 5 minutes with our streamlined Docker setup:
+Get evi-run running in under 5 minutes with our streamlined Docker setup:
 
 ### Prerequisites
 
@@ -139,7 +144,7 @@ To use protected OpenAI models (especially for image generation), you need to co
    docker compose logs -f
    ```
 
-**🎉 That's it! Your evi.run system is now live. Open your Telegram bot and start chatting!**
+**🎉 That's it! Your evi-run system is now live. Open your Telegram bot and start chatting!**
 
 ## ⚡ Quick Commands
 
@@ -295,7 +300,7 @@ For the complete list of available models, capabilities, and pricing, see the **
 
 ### Adding Custom Agents
 
-evi.run uses the **Agents** library with a multi-agent architecture where specialized agents are integrated as tools into the main agent. All agent configuration is centralized in:
+evi-run uses the **Agents** library with a multi-agent architecture where specialized agents are integrated as tools into the main agent. All agent configuration is centralized in:
 
 ```bash
 bot/agents_tools/agents_.py
@@ -374,7 +379,7 @@ dynamic_agent.as_tool(
 
 #### 🤖 Using Alternative Models
 
-evi.run supports non-OpenAI models through the Agents library. There are several ways to integrate other LLM providers:
+evi-run supports non-OpenAI models through the Agents library. There are several ways to integrate other LLM providers:
 
 **Method 1: LiteLLM Integration (Recommended)**
 
@@ -471,7 +476,7 @@ The bot uses [Fluent](https://projectfluent.org/) localization format (`.ftl` fi
 
 ## 📊 Monitoring & Analytics
 
-evi.run includes comprehensive tracing and analytics capabilities through the OpenAI Agents SDK. The system automatically tracks all agent operations and provides detailed insights into performance and usage.
+evi-run includes comprehensive tracing and analytics capabilities through the OpenAI Agents SDK. The system automatically tracks all agent operations and provides detailed insights into performance and usage.
 
 ### 🔍 Built-in Tracing
 
@@ -485,7 +490,7 @@ evi.run includes comprehensive tracing and analytics capabilities through the Op
 
 ### 📈 External Analytics Platforms
 
-evi.run supports integration with 20+ monitoring and analytics platforms:
+evi-run supports integration with 20+ monitoring and analytics platforms:
 
 **Popular Integrations:**
 - **[Weights & Biases](https://weave-docs.wandb.ai/guides/integrations/openai_agents)** - ML experiment tracking
@@ -601,8 +606,8 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 <div align="center">
 
-**Made with ❤️ by the Flash AI team**
+**Made with ❤️ by the evi-run team**
 
-⭐ **Star this repository if evi.run helped you build amazing AI experiences!** ⭐
+⭐ **Star this repository if evi-run helped you build amazing AI experiences!** ⭐
 
 </div>
