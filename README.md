@@ -299,7 +299,11 @@ bot/agents_tools/agents_.py
 custom_agent = Agent(
     name="Custom Agent",
     instructions="Your specialized agent instructions here...",
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
+    model_settings=ModelSettings(
+        reasoning=Reasoning(effort="low"),
+        extra_body={"text": {"verbosity": "medium"}}
+    ),
     tools=[WebSearchTool(search_context_size="medium")]  # Optional tools
 )
 ```
@@ -322,16 +326,17 @@ main_agent = Agent(
 #### ⚙️ Customizing Agent Behavior
 
 **Main Agent (Evi) Personality:**
-Edit the detailed instructions in `main_agent` creation (lines 58-102):
-- Character profile and personality
-- Expertise areas
-- Communication style
-- Behavioral patterns
+Edit the detailed instructions in the `main_agent` instructions block:
+  - Character profile and personality
+  - Expertise areas
+  - Communication style
+  - Behavioral patterns
 
 **Agent Parameters:**
 - `name`: Agent identifier
 - `instructions`: System prompt and behavior
-- `model`: OpenAI model (`gpt-4o`, `gpt-4o-mini`, etc.)
+- `model`: OpenAI model (`gpt-5`, `gpt-5-mini`, etc.)
+- `model_settings`: Model settings (Reasoning, extra_body, etc.)
 - `tools`: Available tools (WebSearchTool, FileSearchTool, etc.)
 - `mcp_servers`: MCP server connections
 
@@ -346,7 +351,11 @@ deep_agent = Agent(
     - Data-driven insights
     - Actionable recommendations
     Always cite sources when available.""",
-    model="gpt-4o",
+    model="gpt-5-mini",
+    model_settings=ModelSettings(
+        reasoning=Reasoning(effort="low"),
+        extra_body={"text": {"verbosity": "medium"}}
+    ),
     tools=[WebSearchTool(search_context_size="high")]
 )
 ```
