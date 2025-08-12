@@ -49,6 +49,9 @@
 - **Multi-Agent Orchestration** - Complex task decomposition and execution
 - **Custom Agent Creation** - Build specialized AI agents for specific tasks
 
+**⚠️ Important for Token Swap:**
+Use Token Swap only in Private mode, since to make transactions on DEX, the system requires access to the wallet's private key, which in the current version is stored in a database in base64 format.
+
 ### 💰 Flexible Usage Modes
 - **Private Mode** - Personal use for bot owner only
 - **Free Mode** - Public access with configurable usage limits
@@ -481,6 +484,16 @@ evi-run includes comprehensive tracing and analytics capabilities through the Op
 - **Handoffs** - Agent-to-agent interactions
 - **Audio Processing** - Speech-to-text and text-to-speech operations
 - **Guardrails** - Safety checks and validations
+
+**⚠️ Important for enabled Tracing:**
+The OpenAI Agents SDK (Tracing) analytics system records all user requests for performance monitoring. Although the data is anonymized, this creates privacy issues.
+
+For ethical reasons, owners of public bots should either explicitly inform users about this, or disable Tracing.
+
+```python
+# Disable Tracking in `bot/agents_tools/agents_.py`
+set_tracing_disabled(True)
+```
 
 ### 📈 External Analytics Platforms
 
