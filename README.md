@@ -2,7 +2,6 @@
 
 <div align="center">
 
-[![evi-run](https://img.shields.io/badge/evi-run-blue?style=flat-square&logo=rocket&logoColor=white)](https://github.com/pipedude/evi-run)
 [![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/OpenAI-Agents_SDK-green?style=flat-square&logo=openai&logoColor=white)](https://openai.github.io/openai-agents-python/)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot_API-blue?style=flat-square&logo=telegram&logoColor=white)](https://core.telegram.org/bots/api)
@@ -149,34 +148,6 @@ To use protected OpenAI models (especially for image generation), you need to co
 
 **🎉 That's it! Your evi-run system is now live. Open your Telegram bot and start chatting!**
 
-## ⚡ Quick Commands
-
-```bash
-# Start the system
-docker compose up -d
-
-# View logs (follow mode)
-docker compose logs -f bot
-
-# Check running containers
-docker compose ps
-
-# Stop the system
-docker compose down
-
-# Restart specific service
-docker compose restart bot
-
-# Update and rebuild
-docker compose up --build -d
-
-# View database logs
-docker compose logs postgres_agent_db
-
-# Check system resources
-docker stats
-```
-
 ---
 
 ## 🔧 Configuration
@@ -212,7 +183,7 @@ TYPE_USAGE = 'private'
 **⚠️ Important for Pay mode:**
 Pay mode enables monetization features and requires activation through project token economics. You can use your own token (created on the Solana blockchain) for monetization.
 
-To activate Pay mode at this time, please contact the project developer ([@playa3000](https://t.me/playa3000)) who will guide you through the process.
+To activate Pay mode at this time, please contact the project ([developer](https://t.me/playa3000)) who will guide you through the process.
 
 Note: In future releases, project tokens will be publicly available for purchase, and the activation process will be fully automated through the bot interface.
 
@@ -222,27 +193,21 @@ Note: In future releases, project tokens will be publicly available for purchase
 
 ### 🎭 Virtual Characters
 Create engaging AI personalities for entertainment, education, or brand representation.
-*Perfect for gaming, educational platforms, content creation, and brand engagement.*
 
 ### 🛠️ Customer Support
 Deploy intelligent support bots that understand context and provide helpful solutions.
-*Ideal for e-commerce, SaaS platforms, and service-based businesses.*
 
 ### 👤 Personal AI Assistant
 Build your own AI companion for productivity, research, and daily tasks.
-*Great for professionals, researchers, and anyone seeking AI-powered productivity.*
 
 ### 📊 Data Analyst
 Automate data processing, generate insights, and create reports from complex datasets.
-*Excellent for business intelligence, research teams, and data-driven organizations.*
 
 ### 💹 Trading Agent
-Develop sophisticated trading bots for decentralized exchanges with real-time analytics.
-*Suitable for crypto traders, DeFi enthusiasts, and financial institutions.*
+Launch trading agents for DEX with real-time analytics.
 
 ### 🔧 Custom Solutions
 Leverage the framework to build specialized AI agents for any domain or industry.
-*Unlimited possibilities for healthcare, finance, education, and enterprise applications.*
 
 ---
 
@@ -343,37 +308,6 @@ Edit the detailed instructions in the `main_agent` instructions block:
 - `tools`: Available tools (WebSearchTool, FileSearchTool, etc.)
 - `mcp_servers`: MCP server connections
 
-**Example Customization:**
-```python
-# Modify deep_agent for specialized research
-deep_agent = Agent(
-    name="Deep Research Agent",
-    instructions="""You are a specialized research agent focused on [YOUR DOMAIN].
-    Provide comprehensive analysis with:
-    - Multiple perspectives
-    - Data-driven insights
-    - Actionable recommendations
-    Always cite sources when available.""",
-    model="gpt-5-mini",
-    model_settings=ModelSettings(
-        reasoning=Reasoning(effort="low"),
-        extra_body={"text": {"verbosity": "medium"}}
-    ),
-    tools=[WebSearchTool(search_context_size="high")]
-)
-```
-
-#### 🔄 Agent Integration Patterns
-
-**As Tool Integration:**
-```python
-# Agents become tools via .as_tool() method
-dynamic_agent.as_tool(
-    tool_name="descriptive_name",
-    tool_description="Clear description for main agent"
-)
-```
-
 #### 🤖 Using Alternative Models
 
 evi-run supports non-OpenAI models through the Agents library. There are several ways to integrate other LLM providers:
@@ -441,7 +375,7 @@ set_default_openai_client(AsyncOpenAI(
 #### 🎯 Best Practices
 
 - **Focused Instructions**: Each agent should have a clear, specific purpose
-- **Model Selection**: Use appropriate models for complexity (gpt-4o vs gpt-4o-mini)
+- **Model Selection**: Use appropriate models for complexity (gpt-5 vs gpt-5-mini)
 - **Tool Integration**: Leverage WebSearchTool, FileSearchTool, and MCP servers
 - **Naming Convention**: Use descriptive tool names for main agent clarity
 - **Testing**: Test agent responses in isolation before integration

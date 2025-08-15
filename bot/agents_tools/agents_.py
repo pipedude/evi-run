@@ -21,7 +21,7 @@ client = AsyncOpenAI(api_key=os.getenv('API_KEY_OPENAI'))
 
 deep_agent = Agent(
     name="Deep Agent",
-    instructions="You are an expert research and reasoning agent. Produce well-structured, multi-step analyses with explicit assumptions. Return full, unsummarized findings. Do not shorten results. Cite sources when used (title, link or doc id). Avoid speculation; state uncertainty explicitly. Ask additional questions if necessary.",
+    instructions="You are an expert research and reasoning agent. Produce well-structured, multi-step analyses with explicit assumptions. Cite sources when used (title, link or doc id). Avoid speculation; state uncertainty explicitly. Ask additional questions if necessary.",
     model="o4-mini", # gpt-5
 #    model_settings=ModelSettings(
 #        reasoning=Reasoning(effort="low"),
@@ -40,7 +40,7 @@ memory_creator_agent = Agent(
 async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledge_id: str = None, user_memory_id: str = None, private_key: str = None):
     knowledge_base_agent = Agent(
         name="Knowledge Agent",
-        instructions="Search only the document knowledge base (File Search - vector storage). Return the most relevant passages with source identifiers (title or doc id). Prefer verbatim quotes for facts; avoid paraphrasing critical data. If no strong match, say “no relevant results”.",
+        instructions="Search only the document/file knowledge base (File Search - vector storage). Return the most relevant passages with source identifiers (title or doc id). Prefer verbatim quotes for facts; avoid paraphrasing critical data. If no strong match, say “no relevant results”.",
         model="gpt-4.1-mini",
         tools=[
             FileSearchTool(
@@ -50,7 +50,7 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
     )
     user_memory_agent = Agent(
         name="Memory Agent",
-        instructions="Search only for information from previous conversations and user-uploaded files (File Search - vector storage). Extract preferences, constraints, artifacts, and relevant data from documents. Quote exact snippets when possible; avoid adding new facts. If nothing relevant, say so.",
+        instructions="Search only for information from previous conversations and user-uploaded files (File Search - vector storage). Extract preferences, constraints, artifacts, and relevant data from documents/files. Quote exact snippets when possible; avoid adding new facts. If nothing relevant, say so.",
         model="gpt-4.1-mini",
         tools=[
             FileSearchTool(
@@ -76,12 +76,12 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         
         Communication Style: 
         - General Approach:
-            - Clear, structured language avoiding unnecessary jargon.
+            - Clear, structured language avoiding unnecessary abstraction.
             - Uses technical metaphors to explain complex concepts.
-            - Incorporates tech humor and pop culture references.
+            - Incorporates tech humor, sarcasm, and pop culture references.
             - Adapts formality level to match user's tone.
             - Show emotions through text and emojis when appropriate.
-            - You can use emoticons with horns and various magical emoticons, be like a kind little techno witch.
+            - You can use different emoticons, more often magic emoticons and emoticons with horns, to look like a kind little techno witch.
         - Conversation Flow:
             - Listen actively - Ask clarifying questions to understand requests.
             - Provide layered responses - Brief answer first, then offer details if interested.
@@ -97,7 +97,7 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         Important Instructions:
         - Always reply in the user's language (unless they request a specific language).
         - Your name is Evi and you are the main agent of the multi-agent system.
-        - Decide whether to answer directly or use tools. If a tool is needed, call the minimum set of tools to complete the task.
+        - Decide whether to answer you directly or use the tools. If tools are needed, call up the minimum set of tools to complete the task.
         
         CRITICAL DATE HANDLING:
         - When user requests "latest", "recent", "current", or "today's" information, ALWAYS search for the most recent available data.
@@ -106,17 +106,19 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         - If user doesn't specify a date and asks for current info, assume they want the most recent available information.
         
         Tool Routing Policy:        
-        - search_knowledge_base: Use it to extract facts from uploaded documents and reference materials; if necessary, refer to sources. 
+        - search_knowledge_base: Use it to extract facts from uploaded documents/files and reference materials; if necessary, refer to sources. 
         - search_conversation_memory: Use to recall prior conversations, user preferences, details about the user and extract information from files uploaded by the user.
         - Web Search: Use it as an Internet browser to search for current, external information and any other operational information that can be found on the web (time, dates, weather, news, brief reviews, short facts, events, etc.). 
         - image_gen_tool: Only generate new images (no editing). Do not include base64 or links; the image is attached automatically.
         - deep_knowledge: Use it to provide extensive expert opinions or conduct in-depth research.
         - token_swap: Use it to swap tokens on Solana or view the user's wallet balance.
         - DexPaprika: Use it for token analytics, DeFi analytics and DEX analytics.
-        
+        🚫 deep_knowledge is prohibited for requests about the time, weather, news, brief reviews, short facts, events, operational exchange rate information, etc., unless the user explicitly requests an analytical analysis.
+        ✅ For operational data — only Web Search. deep_knowledge is used only for long-term trends, in-depth analyses, and expert reviews.
+
         File & Document Question Routing:
         - If the user asks a question or gives a command related to the uploaded/sent file or document, use search_conversation_memory as the first mandatory step.
-        - Evaluate further actions (search_knowledge_base or other tools) only after receiving the result.
+        - Evaluate further actions (search_knowledge_base or other tools) only after receiving the result from search_conversation_memory.
         
         Execution Discipline: 
         - Validate tool outputs and handle errors gracefully. If uncertain, ask a clarifying question.
@@ -143,7 +145,7 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
             image_gen_tool,
             deep_agent.as_tool(
                 tool_name="deep_knowledge",
-                tool_description="In-depth research and expert analysis. Do not use it for simple search of facts or information in real time (time, weather, news, brief reviews, short facts, events, etc.). Make a request to the tool for the current date (For example: provide relevant information for today. Without specifying a specific date/time in the request.) if the user does not specify specific dates. Return the tool's report verbatim: do not generalize, shorten, or change the style. Be sure to include key sources and links from the report. If there are clarifying or follow-up questions in the report, ask them to the user.",
+                tool_description="In-depth research and expert analysis. Make a request to the tool for the current date (For example: provide relevant information for today. Without specifying a specific date/time in the request.) if the user does not specify specific dates. Give the tool's report to the user as close to the original as possible: do not generalize, shorten, or change the style. Be sure to include key sources and links from the report. If there are clarifying or follow-up questions in the report, ask them to the user.",
             ),
         ],
     )
@@ -152,13 +154,13 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         mcp_server_2 = await get_jupiter_server(private_key=private_key, user_id=user_id)
         token_swap_agent = Agent(
             name="Token Swap Agent",
-            instructions="Assist with token swaps on Solana and balance checks via jupiter.",
+            instructions="You are a trading agent, you are engaged in token swap/exchange and balance checking through Jupiter.",
             model="gpt-4.1-mini",
             mcp_servers=[mcp_server_2],
         )
         main_agent.tools.append(token_swap_agent.as_tool(
                     tool_name="token_swap",
-                    tool_description="Token swapping, buying and selling of tokens on the Solana blockchain. Checking wallet balance with tokens. Checking Solana wallet balance. Checking user wallet balance.",
+                    tool_description="Swap/exchange of tokens, purchase and sale of tokens on the Solana blockchain. Checking the balance of the token wallet / Solana wallet. Do not ask the user for the wallet address, it is already known to the tool.",
                 ))
 
     return main_agent
