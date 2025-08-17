@@ -1,18 +1,26 @@
-# Виртуальное окружение
+# Virtual environments
 venv/
 env/
+.venv/
+docs/.venv/
+site/
+docs/site/
+.cache/
+docs/.cache/
+docs/
 
-# Кэш Python
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Файлы сред и конфигураций
+# Environment and configuration files
 .env
+mkdocs.yml
 
-# Логи
+# Logs
 *.log
 
-# Временные файлы
+# Temporary files
 .DS_Store
 __MACOSX/
