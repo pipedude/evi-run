@@ -1,11 +1,21 @@
 start_text = 
-    I'm Evy — a practicing tech witch! 😈✨
+    I'm Evi — a practicing tech witch... haha, actually I'm a multi-agent system with artificial intelligence and I know practically everything about this... and other worlds! 😈✨
 
-    Haha, actually I'm a multi-agent system with artificial intelligence and I know practically everything about this... and other worlds! 🦄👻
+    I can complete various tasks and assignments for you, or we can just have fun chatting. 🦄👻
 
-    I can perform some tasks and assignments for you, or we can just have fun together. My capabilities include: conducting deep research, searching for current information on the internet, working with documents and images, creating images, DEX analytics, token swapping on DEX. I have customizable memory, and I can remember important information from our conversations. You can also delete the history of our conversations or add new knowledge to my memory. 🧙‍♀️🔮
+    My capabilities include (but are not limited to):
+    - solving complex, multi-step tasks;
+    - conducting deep research;
+    - intelligent web search;
+    - document and image analysis;
+    - image creation;
+    - DEX analytics and Solana token swapping.
 
-    Just write in chat or send voice messages to start interacting! 🪄✨
+    I can schedule task execution for the time you need or with a specific frequency. I have customizable memory and I remember important information from our conversations. You can also delete the history of our conversations or add new knowledge to my memory. 🧙‍♀️🔮
+
+    Just write your requests in chat in natural language or send voice messages to start interacting! 🪄✨
+
+    ⚠️ Tip! Periodically reset the conversation context with the /new command — this will help save tokens and speed up request processing.
 
 close_kb = Close
 
@@ -138,3 +148,7 @@ check_payment_success_text = Payment completed successfully!
 check_payment_error_text = Payment was not completed! Please try later.
 
 warning_text_no_row_md = Context was deleted. Row not found in database.
+
+text_user_upload_file = The user uploaded the { $filename } file to the tool search_conversation_memory
+
+wait_answer_text_scheduler = Executing the scheduler's request ✨

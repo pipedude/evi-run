@@ -20,7 +20,7 @@
 
 ## 🌟 What is evi-run?
 
-**evi-run** is a powerful, production-ready multi-agent AI system that bridges the gap between out-of-the-box solutions and custom AI frameworks. Built on Python with OpenAI Agents SDK integration, it delivers enterprise-grade AI capabilities through an intuitive Telegram bot interface.
+**evi-run** is a powerful, production-ready multi-agent AI system that bridges the gap between out-of-the-box solutions and custom AI frameworks. Built on Python using the OpenAI Agents SDK, the system has an intuitive interface via a Telegram bot and provides enterprise-level artificial intelligence capabilities.
 
 ### ✨ Key Advantages
 
@@ -34,22 +34,23 @@
 
 ## 🎯 Features
 
-### 🔮 Core AI Capabilities
+### 🔮 Advanced System Features
 - **Memory Management** - Context control and long-term memory
 - **Knowledge Integration** - Dynamic knowledge base expansion
-- **Document Processing** - Handle PDFs, images, and various file formats
-- **Deep Research** - Multi-step investigation and analysis
-- **Web Intelligence** - Smart internet search and data extraction
-- **Image Generation** - AI-powered visual content creation
-
-### 🦄 Advanced AI Features
-- **DEX Analytics** - Real-time decentralized exchange monitoring
-- **Token Swap** - Easy, fast and secure token swap
+- **Task Scheduling** - Scheduling and deferred task execution / once / daily / interval /
 - **Multi-Agent Orchestration** - Complex task decomposition and execution
 - **Custom Agent Creation** - Build specialized AI agents for specific tasks
 
+### 🦄 AI Features
+- **Deep Research** - Multi-step investigation and analysis
+- **Web Intelligence** - Smart internet search and data extraction
+- **Document Processing** - Handle PDFs, images, and various file formats
+- **Image Generation** - AI-powered visual content creation
+- **DEX Analytics** - Real-time decentralized exchange monitoring
+- **Solana Token Swap** - Easy, fast and secure token swap
+
 **⚠️ Important for Token Swap:**
-Use Token Swap only in Private mode, since to make transactions on DEX, the system requires access to the wallet's private key, which in the current version is stored in a database in base64 format.
+The token swap function is only active in private mode. Your private key will be stored in your database in base64 format.
 
 ### 💰 Flexible Usage Modes
 - **Private Mode** - Personal use for bot owner only
@@ -58,7 +59,7 @@ Use Token Swap only in Private mode, since to make transactions on DEX, the syst
 
 ### ⏳ Under Development
 - **NSFW Mode** - Unrestricted topic exploration and content generation
-- **Task Scheduler** - Automated agent task planning and execution
+- **Task Scheduler** - Automated agent task planning and execution / ✅ completed /
 - **Automatic Limit Orders** - Smart trading with automated take-profit and stop-loss functionality
 
 ---
@@ -69,8 +70,8 @@ Use Token Swap only in Private mode, since to make transactions on DEX, the syst
 |-----------|------------|
 | **Core Language** | Python 3.9+ |
 | **AI Framework** | OpenAI Agents SDK |
-| **Communication** | MCP (Model Context Protocol) |
-| **Blockchain** | Solana RPC |
+| **Communication** | Model Context Protocol |
+| **Blockchain** | Solana RPC API |
 | **Interface** | Telegram Bot API |
 | **Database** | PostgreSQL |
 | **Cache** | Redis |
@@ -181,11 +182,7 @@ TYPE_USAGE = 'private'
 | **Pay** | Monetized with balance system | Commercial applications, SaaS |
 
 **⚠️ Important for Pay mode:**
-Pay mode enables monetization features and requires activation through project token economics. You can use your own token (created on the Solana blockchain) for monetization.
-
-To activate Pay mode at this time, please contact the project ([developer](https://t.me/playa3000)) who will guide you through the process.
-
-Note: In future releases, project tokens will be publicly available for purchase, and the activation process will be fully automated through the bot interface.
+Pay mode enables monetization features. To activate this mode, the owner must burn a certain amount of $EVI tokens. The platform supports custom tokens created on the Solana blockchain for monetization purposes.
 
 ---
 
@@ -538,10 +535,13 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ---
 
-## 📞 Support
+## 👽 Community and Support
 
-- **Telegram**: [@playa3000](https://t.me/playa3000)
-- **Community**: [Telegram Support Group](https://t.me/evi_run)
+- **Website**: [evi.run](https://evi.run)
+- **Contact**: [Alex Flash](https://t.me/playa3000)
+- **Community**: [Telegram Group](https://t.me/evi_run)
+- **X (Twitter)**: [alexflash99](https://x.com/alexflash99)
+- **Reddit**: [Alex Flash](https://www.reddit.com/user/Worth_Professor_425/)
 
 ---
 

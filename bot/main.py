@@ -8,6 +8,7 @@ from aiogram.fsm.storage.redis import RedisStorage
 from aiogram_dialog import setup_dialogs
 from solana.rpc.async_api import AsyncClient
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 from redis_service.connect import redis
 from I18N.factory import i18n_factory
@@ -26,13 +27,12 @@ from bot.utils.check_burn_address import add_burn_address
 from bot.commands import set_commands
 from bot.scheduler_funcs.daily_tokens import add_daily_tokens
 from bot.agents_tools.mcp_servers import get_dexpapirka_server
+from bot.utils.create_bot import bot
+from bot.utils.scheduler_provider import set_scheduler
 
 load_dotenv()
 
 storage = RedisStorage(redis, key_builder=DefaultKeyBuilder(with_destiny=True))
-bot = Bot(os.getenv('TELEGRAM_BOT_TOKEN'), default=DefaultBotProperties(parse_mode='HTML',
-                                                                        link_preview_is_disabled=True))
-
 dp = Dispatcher(storage=storage)
 
 solana_client = AsyncClient("https://api.mainnet-beta.solana.com")
@@ -42,9 +42,22 @@ async def main():
     await set_commands(bot)
     print(await bot.get_me())
 
-    scheduler = AsyncIOScheduler(timezone='UTC')
-    scheduler.add_job(add_daily_tokens, trigger='cron', hour='0', minute='0', args=[async_session])
+    scheduler = AsyncIOScheduler(timezone='UTC',
+                                 jobstores={
+                                     'default': SQLAlchemyJobStore(url=os.getenv('DATABASE_URL'))
+                                            },
+                                 job_defaults={
+                                     "coalesce": True,
+                                     "max_instances": 1,
+                                            },
+                                 )
+    set_scheduler(scheduler)
     scheduler.start()
+
+    if not scheduler.get_job('daily_tokens'):
+        scheduler.add_job(add_daily_tokens, trigger='cron', hour='0', minute='0', id='daily_tokens')
+
+    print(scheduler.get_jobs())
 
     dexpaprika_server = await get_dexpapirka_server()
 
@@ -59,7 +72,8 @@ async def main():
 
     setup_dialogs(dp)
 
-    await dp.start_polling(bot, _translator_hub=i18n_factory(), redis=redis, solana_client=solana_client, mcp_server=dexpaprika_server)
+    await dp.start_polling(bot, _translator_hub=i18n_factory(), redis=redis,
+                           solana_client=solana_client, mcp_server=dexpaprika_server, scheduler=scheduler)
 
 
 async def on_startup():

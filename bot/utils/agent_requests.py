@@ -61,7 +61,7 @@ async def encode_image(image_path):
 
 
 async def text_request(text: str, user: User, user_repo: UserRepository, utils_repo: UtilsRepository,
-                       redis: Redis, mcp_server_1: MCPServerStdio, bot: Bot):
+                       redis: Redis, mcp_server_1: MCPServerStdio, bot: Bot, scheduler):
     vector_store_id, knowledge_id = await return_vectors(user_id=user.telegram_id, user_repo=user_repo, utils_repo=utils_repo)
     messages = await user_repo.get_messags(user_id=user.telegram_id)
     user_wallet = await user_repo.get_wallet(user_id=user.telegram_id)
@@ -79,7 +79,7 @@ async def text_request(text: str, user: User, user_repo: UserRepository, utils_r
                 }]}
                for message in messages] + [{'role': 'user', 'content': text}],
 
-        context=(client, user.telegram_id),
+        context=(client, user.telegram_id, user_repo, scheduler),
         run_config=RunConfig(
             tracing_disabled=False
         )
@@ -117,7 +117,7 @@ async def text_request(text: str, user: User, user_repo: UserRepository, utils_r
 
 async def image_request(image_bytes: bytes, user: User, user_repo: UserRepository,
                         utils_repo: UtilsRepository, redis: Redis, mcp_server_1: MCPServerStdio, bot: Bot,
-                        caption: str = None):
+                        scheduler, caption: str = None):
 
     vector_store_id, knowledge_id = await return_vectors(user_id=user.telegram_id, user_repo=user_repo, utils_repo=utils_repo)
     messages = await user_repo.get_messags(user_id=user.telegram_id)
@@ -145,7 +145,7 @@ async def image_request(image_bytes: bytes, user: User, user_repo: UserRepositor
                           "image_url": f"data:image/jpeg;base64,{base64.b64encode(image_bytes).decode('utf-8')}",
                       }]}],
 
-        context=(client, user.telegram_id),
+        context=(client, user.telegram_id, user_repo, scheduler),
         run_config=RunConfig(
             tracing_disabled=False
         )

@@ -4,9 +4,13 @@
 
 # REQUIRED! Enter your Telegram ID (get from @userinfobot)
 ADMIN_ID = 1234567890
+ADMINS_LIST = [1234567890, 9876543210]
 
 # Bot usage mode: 'private' (owner only), 'free' (public with limits), 'pay' (monetized)
 TYPE_USAGE = 'private'
+
+# Start balance for pay and free mode new users
+START_BALANCE = 100
 
 # Daily credit allocation for pay and free mode users
 CREDITS_USER_DAILY = 500

@@ -16,7 +16,7 @@ import bot.keyboards.inline as inline_kb
 from bot.states.states import Menu, Settings, Knowledge, Wallet, Input, Balance
 from bot.utils.send_answer import process_after_photo, process_after_text
 from bot.utils.funcs_gpt import transcribe_audio, add_file_to_memory
-from config import TYPE_USAGE, ADMIN_ID
+from config import TYPE_USAGE, ADMIN_ID, ADMINS_LIST
 from bot.utils.check_payment import check_payment_sol, check_payment_ton
 
 router = Router()
@@ -49,13 +49,6 @@ async def select_language(callback: CallbackQuery, user_repo: UserRepository, us
 
     await callback.message.edit_text(text=translator.get('start_text'),
                                      reply_markup=inline_kb.close_text(translator.get('close_kb')))
-
-
-@router.message(Command('wallet'))
-async def cmd_wallet(message: Message, state: FSMContext, dialog_manager: DialogManager):
-    await state.set_state(Input.main)
-    await dialog_manager.start(state=Wallet.main, mode=StartMode.RESET_STACK)
-
 
 @router.message(Command('help'))
 async def cmd_help(message: Message, state: FSMContext, i18n):
@@ -100,11 +93,11 @@ async def cmd_settings(message: Message, dialog_manager: DialogManager, state: F
 
 
 @router.message(F.text, StateFilter(None))
-async def text_input(message: Message, user_repo: UserRepository, utils_repo: UtilsRepository, redis: Redis, user: User, i18n, mcp_server):
+async def text_input(message: Message, user_repo: UserRepository, utils_repo: UtilsRepository, redis: Redis, user: User, i18n, mcp_server, scheduler):
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID:
+        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:
@@ -113,15 +106,15 @@ async def text_input(message: Message, user_repo: UserRepository, utils_repo: Ut
     await redis.set(f'request_{message.from_user.id}', 't', ex=40)
     mess_to_delete = await message.answer(text=i18n.get('wait_answer_text'))
     task = asyncio.create_task(process_after_text(message=message, user=user, user_repo=user_repo, utils_repo=utils_repo,
-                                                  redis=redis, i18n=i18n, mess_to_delete=mess_to_delete, mcp_server_1=mcp_server))
+                                                  redis=redis, i18n=i18n, mess_to_delete=mess_to_delete, mcp_server_1=mcp_server, scheduler=scheduler))
 
 
 @router.message(F.photo, StateFilter(None))
-async def photo_input(message: Message, user_repo: UserRepository, utils_repo: UserRepository, redis: Redis, user: User, i18n, mcp_server):
+async def photo_input(message: Message, user_repo: UserRepository, utils_repo: UserRepository, redis: Redis, user: User, i18n, mcp_server, scheduler):
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID:
+        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:
@@ -130,15 +123,15 @@ async def photo_input(message: Message, user_repo: UserRepository, utils_repo: U
     await redis.set(f'request_{message.from_user.id}', 't', ex=40)
     mess_to_delete = await message.answer(text=i18n.get('wait_answer_text'))
     task = asyncio.create_task(process_after_photo(message=message, user=user, user_repo=user_repo, utils_repo=utils_repo,
-                                                   redis=redis, i18n=i18n, mess_to_delete=mess_to_delete, mcp_server_1=mcp_server))
+                                                   redis=redis, i18n=i18n, mess_to_delete=mess_to_delete, mcp_server_1=mcp_server, scheduler=scheduler))
 
 
 @router.message(F.voice, StateFilter(None))
-async def input_voice(message: Message, user_repo: UserRepository, utils_repo: UserRepository, redis: Redis, user: User, i18n, mcp_server):
+async def input_voice(message: Message, user_repo: UserRepository, utils_repo: UserRepository, redis: Redis, user: User, i18n, mcp_server, scheduler):
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID:
+        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:
@@ -158,15 +151,16 @@ async def input_voice(message: Message, user_repo: UserRepository, utils_repo: U
 
     task = asyncio.create_task(
         process_after_text(message=message, user=user, user_repo=user_repo, utils_repo=utils_repo,
-                           redis=redis, i18n=i18n, mess_to_delete=mess_to_delete, text_from_voice=text_from_voice, mcp_server_1=mcp_server))
+                           redis=redis, i18n=i18n, mess_to_delete=mess_to_delete, text_from_voice=text_from_voice, mcp_server_1=mcp_server,
+                           scheduler=scheduler))
 
 
 @router.message(F.document, StateFilter(None))
-async def input_document(message: Message, user_repo: UserRepository, utils_repo: UserRepository, redis: Redis, user: User, i18n):
+async def input_document(message: Message, user_repo: UserRepository, utils_repo: UserRepository, redis: Redis, user: User, i18n, mcp_server, scheduler):
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID:
+        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:
@@ -185,12 +179,17 @@ async def input_document(message: Message, user_repo: UserRepository, utils_repo
         await add_file_to_memory(user_repo=user_repo, user=user,
                                  file_name=message.document.file_name, file_bytes=file_bytes,
                                  mem_type=DICT_FORMATS.get(format_doc))
-        await message.answer(i18n.get('text_document_upload'))
+        task = asyncio.create_task(
+            process_after_text(message=message, user=user, user_repo=user_repo, utils_repo=utils_repo,
+                               redis=redis, i18n=i18n, mess_to_delete=mess_to_delete, mcp_server_1=mcp_server,
+                               constant_text=i18n.get('text_user_upload_file', filename=message.document.file_name),
+                               scheduler=scheduler)
+        )
     except Exception as e:
         await message.answer(i18n.get('warning_text_error'))
-    finally:
         await redis.delete(f'request_{message.from_user.id}')
         await mess_to_delete.delete()
+
 
 
 @router.callback_query(F.data.startswith('check_payment_'))

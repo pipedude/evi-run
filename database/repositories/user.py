@@ -3,7 +3,7 @@ import base64
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select, delete, update, asc
 
-from database.models import User, ChatMessage, Wallet, MemoryVector, Payment
+from database.models import User, ChatMessage, Wallet, MemoryVector, Payment, UserTasks
 
 
 class UserRepository:
@@ -101,3 +101,23 @@ class UserRepository:
 
     async def get_row_for_md(self, row_id: int):
         return await self.session.scalar(select(ChatMessage).where(ChatMessage.id == row_id))
+
+    async def add_task(self, user_id: int, **kwargs):
+        task = UserTasks(user_id=user_id, **kwargs)
+        self.session.add(task)
+        await self.session.commit()
+        return task.id
+
+    async def get_task(self, user_id: int, task_id: int):
+        return await self.session.scalar(select(UserTasks).where(and_(UserTasks.user_id == user_id, UserTasks.id == task_id)))
+
+    async def get_all_tasks(self, user_id: int):
+        return (await self.session.scalars(select(UserTasks).where(UserTasks.user_id == user_id))).fetchall()
+
+    async def delete_task(self, user_id: int, task_id: int):
+        await self.session.execute(delete(UserTasks).where(and_(UserTasks.user_id == user_id, UserTasks.id == task_id)))
+        await self.session.commit()
+
+    async def update_task(self, user_id: int, task_id: int, **kwargs):
+        await self.session.execute(update(UserTasks).where(and_(UserTasks.user_id == user_id, UserTasks.id == task_id)).values(**kwargs))
+        await self.session.commit()

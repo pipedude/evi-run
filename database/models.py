@@ -9,7 +9,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
-from config import CREDITS_USER_DAILY
+from config import START_BALANCE
 
 load_dotenv()
 
@@ -31,7 +31,7 @@ class User(Base):
 
     telegram_id = Column(BigInteger, primary_key=True)
     language = Column(String(10), nullable=True)
-    balance_credits = Column(Float, default=CREDITS_USER_DAILY)
+    balance_credits = Column(Float, default=START_BALANCE)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
     wallets = relationship('Wallet', back_populates='user')
@@ -120,6 +120,26 @@ class Logs(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
     user = relationship('User', back_populates='logs')
+
+
+class UserTasks(Base):
+    __tablename__ = 'user_tasks'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, ForeignKey('users.telegram_id'))
+    description = Column(Text, nullable=False)
+    agent_message = Column(Text, nullable=False)
+    schedule_type = Column(String('20'), nullable=False)
+    time_str = Column(Text, nullable=True)
+    date_str = Column(Text, nullable=True)
+    interval_minutes = Column(Integer, nullable=True)
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    last_executed = Column(TIMESTAMP(timezone=True), server_onupdate=func.now(), nullable=True)
+
+
+
 
 
 async def create_tables():

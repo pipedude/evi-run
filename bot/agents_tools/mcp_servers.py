@@ -8,9 +8,14 @@ from agents.mcp import MCPServerStdio
 MAX_SERVERS = 20
 
 servers: OrderedDict[str, MCPServerStdio] = OrderedDict()
+global_dexpaprika_server = None
 
 
 async def get_dexpapirka_server():
+    global global_dexpaprika_server
+    if global_dexpaprika_server:
+        return global_dexpaprika_server
+
     dexpaprika_server = MCPServerStdio(
         name="DexPaprika",
         params={
@@ -19,6 +24,7 @@ async def get_dexpapirka_server():
         }
     )
     await dexpaprika_server.connect()
+    global_dexpaprika_server = dexpaprika_server
     return dexpaprika_server
 
 

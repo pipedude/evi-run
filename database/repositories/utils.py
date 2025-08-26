@@ -1,10 +1,10 @@
 from datetime import datetime, timezone, timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, select, delete, desc, update
+from sqlalchemy import and_, select, delete, desc, update, or_
 
 from database.models import User, ChatMessage, TokenPrice, KnowledgeVector, Payment
-from config import ADMIN_ID, CREDITS_ADMIN_DAILY, CREDITS_USER_DAILY
+from config import ADMIN_ID, CREDITS_ADMIN_DAILY, CREDITS_USER_DAILY, ADMINS_LIST
 
 
 class UtilsRepository:
@@ -61,9 +61,13 @@ class UtilsRepository:
 
     async def update_tokens_daily(self):
         await self.session.execute(update(User).where(and_(User.telegram_id != ADMIN_ID,
+                                                           User.telegram_id.notin_(ADMINS_LIST),
                                                            User.balance_credits < CREDITS_USER_DAILY)
                                                       ).values(balance_credits=CREDITS_USER_DAILY))
-        await self.session.execute(update(User).where(and_(User.telegram_id == ADMIN_ID,
-                                                           User.balance_credits < CREDITS_USER_DAILY)
+
+        await self.session.execute(update(User).where(and_(or_(User.telegram_id == ADMIN_ID,
+                                                               User.telegram_id.in_(ADMINS_LIST)
+                                                               ),
+                                                           User.balance_credits < CREDITS_ADMIN_DAILY)
                                                       ).values(balance_credits=CREDITS_ADMIN_DAILY))
         await self.session.commit()

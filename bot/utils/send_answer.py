@@ -94,13 +94,21 @@ def split_code_message(text, chunk_size=3700, type_: str = None):
 
 async def process_after_text(message: Message, user: User, user_repo: UserRepository,
                              utils_repo: UtilsRepository, redis: Redis, i18n,
-                             mess_to_delete: Message, mcp_server_1: MCPServerStdio, text_from_voice: str = None):
+                             mess_to_delete: Message, mcp_server_1: MCPServerStdio, scheduler, text_from_voice: str = None,
+                             constant_text: str = None):
     try:
-        answer = await text_request(text=text_from_voice if text_from_voice else message.text, user=user,
-                                    user_repo=user_repo, utils_repo=utils_repo, redis=redis, mcp_server_1=mcp_server_1,
-                                    bot=message.bot)
+        if text_from_voice:
+            user_ques = text_from_voice
+        elif constant_text:
+            user_ques = constant_text
+        else:
+            user_ques = message.text
 
-        await send_answer_text(user_ques=message.text if message.text else 'image',
+        answer = await text_request(text=user_ques, user=user,
+                                    user_repo=user_repo, utils_repo=utils_repo, redis=redis, mcp_server_1=mcp_server_1,
+                                    bot=message.bot, scheduler=scheduler)
+
+        await send_answer_text(user_ques=user_ques,
                                message=message, answer=answer, user=user, user_repo=user_repo, i18n=i18n)
 
         if answer.input_tokens + answer.output_tokens > TOKENS_LIMIT_FOR_WARNING_MESSAGE:
@@ -130,14 +138,14 @@ async def send_answer_photo(message: Message, answer: AnswerImage, user: User, u
 
 async def process_after_photo(message: Message, user: User, user_repo: UserRepository,
                               utils_repo: UtilsRepository, redis: Redis, i18n, mess_to_delete: Message,
-                              mcp_server_1: MCPServerStdio):
+                              mcp_server_1: MCPServerStdio, scheduler):
     try:
         file_id = message.photo[-1].file_id
         file_path = await message.bot.get_file(file_id=file_id)
         file_bytes = (await message.bot.download_file(file_path.file_path)).read()
         answer = await image_request(image_bytes=file_bytes, user=user, user_repo=user_repo,
                                      utils_repo=utils_repo, redis=redis, mcp_server_1=mcp_server_1, bot=message.bot,
-                                     caption=message.caption)
+                                     caption=message.caption, scheduler=scheduler)
 
         await send_answer_photo(message=message, answer=answer, user=user, user_repo=user_repo)
 
