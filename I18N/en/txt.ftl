@@ -1,5 +1,5 @@
 start_text = 
-    I'm Evi — a practicing tech witch... haha, actually I'm a multi-agent system with artificial intelligence and I know practically everything about this... and other worlds! 😈✨
+    I'm Evi — a virtual techno witch... haha, actually I'm a multi-agent system with artificial intelligence and I know practically everything about this... and other worlds! 😈✨
 
     I can complete various tasks and assignments for you, or we can just have fun chatting. 🦄👻
 
