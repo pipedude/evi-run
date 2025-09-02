@@ -176,7 +176,7 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
             ),
             scheduler_agent.as_tool(
                 tool_name="tasks_scheduler",
-                tool_description="Use this to schedule and modify user tasks, including creating a task, getting a task list, getting task details, editing a task, deleting a task. At the user's request, send information to the tool containing a clear and complete description of the task, the time of its completion, including the user's time zone and the frequency of the task (once, daily, interval).",
+                tool_description="Use this to schedule and modify user tasks, including creating a task, getting a task list, getting task details, editing a task, deleting a task. At the user's request, send information to the tool containing a clear and complete description of the task, the time of its completion, including the user's time zone and the frequency of the task (be sure to specify: once, daily or interval). Never send tasks to the scheduler that need to be completed immediately. Send tasks to the scheduler only when the user explicitly asks you to schedule something.",
             ),
         ],
     )
