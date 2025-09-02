@@ -14,9 +14,9 @@
 
 [🚀 Quick Start](#-quick-installation) • [🤖 Try Demo](https://t.me/my_evi_bot) • [🔧 Configuration](#-configuration) • [🎯 Features](#-features) • [💡 Use Cases](#-use-cases)
 
-**Connect with fellow developers and AI enthusiasts!**
-
 [![Join our Telegram Community](https://img.shields.io/badge/Join_Community-Telegram-blue?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/evi_run)
+
+**Connect with fellow developers and AI enthusiasts!**
 
 </div>
 
