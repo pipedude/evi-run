@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/OpenAI-Agents_SDK-green?style=flat-square&logo=openai&logoColor=white)](https://openai.github.io/openai-agents-python/)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot_API-blue?style=flat-square&logo=telegram&logoColor=white)](https://core.telegram.org/bots/api)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
@@ -72,7 +72,7 @@ The token swap function is only active in private mode. Your private key will be
 
 | Component | Technology |
 |-----------|------------|
-| **Core Language** | Python 3.9+ |
+| **Core Language** | Python 3.11 |
 | **AI Framework** | OpenAI Agents SDK |
 | **Communication** | Model Context Protocol |
 | **Blockchain** | Solana RPC API |
