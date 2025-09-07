@@ -24,3 +24,11 @@ mkdocs.yml
 # Temporary files
 .DS_Store
 __MACOSX/
+
+# Local tests (excluded from VCS as requested)
+tests/
+
+# Pytest artifacts
+.pytest_cache/
+.coverage
+pytest.ini
