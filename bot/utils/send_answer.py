@@ -34,57 +34,260 @@ async def send_answer_text(user_ques: str, message: Message, answer: AnswerText,
                 await message.answer(mess)
 
 
-def split_code_message(text, chunk_size=3700, type_: str = None):
+def split_code_message(text, type_: str = None):
+    """
+    Reliably split Telegram HTML into chunks while preserving valid markup.
+    - Self-closing tags are not pushed to the stack and therefore are not closed.
+    - For opened tags we store the full opening form including attributes to re-open later.
+    - Never split inside an HTML tag or inside an HTML entity.
+    - Preserve Telegram-specific nuances such as <blockquote expandable> and <pre>/<code> blocks.
+    """
     if not type_:
         text = telegram_format(text)
         text = text.replace('&lt;blockquote expandable&gt;', '<blockquote expandable>')
+
+    # Escape HTML comments <!-- ... --> so they are treated as text,
+    # not as tags that could break the open/close stack while splitting
+    comment_pattern = re.compile(r"<!--.*?-->", re.DOTALL)
+
+    def _escape_comment(m):
+        c = m.group(0)
+        return c.replace('<', '&lt;').replace('>', '&gt;')
+
+    text = comment_pattern.sub(_escape_comment, text)
+
     chunks = []
     current_chunk = ""
-    open_tags = []
+
+    # Stack of opened tags: items are dicts {name, open}
+    open_stack = []
     position = 0
+
     tag_pattern = re.compile(r"<(\/)?([a-zA-Z0-9\-]+)([^>]*)>")
 
-    def close_open_tags():
-        return "".join(f"</{tag}>" for tag in reversed(open_tags))
+    # Set of self-closing/non-closing tags in Telegram HTML context
+    SELF_CLOSING = {"br"}
 
-    def reopen_tags():
-        return "".join(f"<{tag if tag != 'blockquote' else 'blockquote expandable'}>" for tag in open_tags)
+    def is_self_closing(tag_name: str, tag_full: str) -> bool:
+        return tag_name in SELF_CLOSING or tag_full.strip().endswith('/>')
 
-    while position < len(text):
-        if len(current_chunk) >= chunk_size:
+    def close_open_tags() -> str:
+        # Close only normal opened tags in reverse order
+        closing = []
+        for item in reversed(open_stack):
+            closing.append(f"</{item['name']}>")
+        return "".join(closing)
+
+    def reopen_tags() -> str:
+        # Re-open saved opening tags (with attributes) in original order.
+        # For blockquote expandable we keep the original form as-is.
+        return "".join(item['open'] for item in open_stack)
+
+    def escape_tag_text(tag_text: str) -> str:
+        """Render a tag as plain text by escaping angle brackets."""
+        return tag_text.replace('<', '&lt;').replace('>', '&gt;')
+
+    def safe_cut_index(text_: str, start: int, tentative_end: int) -> int:
+        """Shift a split position so that we never cut inside a tag or an HTML entity."""
+        end = min(tentative_end, len(text_))
+        if end <= start:
+            return end
+
+        segment = text_[start:end]
+
+        # 1) Do not split inside a tag: if the last '<' is after the last '>' -> move back to that '<'
+        last_lt = segment.rfind('<')
+        last_gt = segment.rfind('>')
+        if last_lt != -1 and (last_gt == -1 or last_lt > last_gt):
+            end = start + last_lt
+            if end <= start:
+                return start
+            segment = text_[start:end]
+
+        # 2) Do not split inside an entity: if there's '&' after the last ';' -> move back to that '&'
+        last_amp = segment.rfind('&')
+        last_semi = segment.rfind(';')
+        if last_amp != -1 and (last_semi == -1 or last_amp > last_semi):
+            end = start + last_amp
+
+        return end
+
+    text_len = len(text)
+    while position < text_len:
+        # Dynamic budget for the current chunk
+        SAFETY = 64
+        BASE_LIMIT = 3900
+        allowed_total = BASE_LIMIT - len(close_open_tags()) - len(reopen_tags()) - SAFETY
+        # Clamp to reasonable bounds just in case
+        if allowed_total < 1000:
+            allowed_total = 1000
+        elif allowed_total > BASE_LIMIT:
+            allowed_total = BASE_LIMIT
+
+        # If current chunk is full — close and start a new one
+        if len(current_chunk) >= allowed_total:
             current_chunk += close_open_tags()
             chunks.append(current_chunk)
             current_chunk = reopen_tags()
 
-        next_cut = position + chunk_size - len(current_chunk)
-        next_match = tag_pattern.search(text, position, next_cut)
+        # Compute the boundary where we can safely write more characters
+        tentative_end = position + (allowed_total - len(current_chunk))
+        if tentative_end <= position:
+            # No room left — force a chunk break
+            current_chunk += close_open_tags()
+            chunks.append(current_chunk)
+            current_chunk = reopen_tags()
+            continue
+
+        # Look for the next tag before the boundary
+        next_match = tag_pattern.search(text, position, min(tentative_end, text_len))
 
         if not next_match:
-            current_chunk += text[position:next_cut]
-            position = next_cut
-        else:
-            start, end = next_match.span()
-            tag_full = next_match.group(0)
-            is_closing = next_match.group(1) == "/"
-            tag_name = next_match.group(2)
+            # No tags before boundary — split at a safe position
+            cut_idx = safe_cut_index(text, position, min(tentative_end, text_len))
+            if cut_idx == position:
+                # No safe position found in the window — extend the window to find the next tag/entity end
+                extend_end = min(position + 100 + (allowed_total - len(current_chunk)), text_len)
+                next_match_ext = tag_pattern.search(text, position, extend_end)
+                if next_match_ext:
+                    cut_idx = next_match_ext.start()
+                else:
+                    # No complete tag found in lookahead — split before a partial '<...'
+                    extended_segment = text[position:extend_end]
+                    last_lt = extended_segment.rfind('<')
+                    if last_lt != -1:
+                        # Check if there's '>' after that '<' in the extended window
+                        gt_after = extended_segment.find('>', last_lt + 1)
+                        if gt_after == -1:
+                            # Tag is not completed within the window — cut before '<'
+                            cut_idx = position + last_lt
+                        else:
+                            cut_idx = extend_end
+                    else:
+                        cut_idx = extend_end
+            # Zero-shift guard (when cut_idx == position):
+            # happens if a partial tag starts exactly at 'position'.
+            if cut_idx == position:
+                if current_chunk:
+                    # Close current chunk and start a new one before continuing
+                    current_chunk += close_open_tags()
+                    chunks.append(current_chunk)
+                    current_chunk = reopen_tags()
+                    continue
+                else:
+                    # Current chunk is empty — extend search forward to the next '>' and advance at least to it
+                    search_end = min(position + 300, text_len)
+                    gt_global = text.find('>', position, search_end)
+                    if gt_global != -1:
+                        cut_idx = gt_global + 1
+                    else:
+                        # Last resort — move to search_end to avoid infinite loop
+                        cut_idx = search_end
+            current_chunk += text[position:cut_idx]
+            position = cut_idx
+            continue
 
-            if start - position + len(current_chunk) >= chunk_size:
-                current_chunk += close_open_tags()
-                chunks.append(current_chunk)
-                current_chunk = reopen_tags()
+        # There is a tag before the boundary
+        start_tag, end_tag = next_match.span()
+        tag_full = next_match.group(0)
+        is_closing = next_match.group(1) == "/"
+        tag_name = next_match.group(2)
+        _ = next_match.group(3)
 
-            current_chunk += text[position:start]
-            position = start
+        # If text before the tag doesn't fit — break the chunk
+        if (start_tag - position) + len(current_chunk) > allowed_total:
+            current_chunk += close_open_tags()
+            chunks.append(current_chunk)
+            current_chunk = reopen_tags()
+            continue
 
-            if is_closing:
-                if tag_name in open_tags:
-                    open_tags.remove(tag_name)
+        # Append text up to the tag
+        current_chunk += text[position:start_tag]
+        position = start_tag
+
+        # Tag handling
+        if is_closing:
+            # Prefer strict LIFO, but outside pre/code try to fix nesting to preserve formatting
+            if open_stack and open_stack[-1]['name'] == tag_name:
+                # Does the tag itself fit into the current chunk?
+                if len(current_chunk) + (end_tag - start_tag) > allowed_total:
+                    current_chunk += close_open_tags()
+                    chunks.append(current_chunk)
+                    current_chunk = reopen_tags()
+                current_chunk += tag_full
+                # Pop the top tag
+                open_stack.pop()
             else:
-                open_tags.append(tag_name)
+                if open_stack and open_stack[-1]['name'] in {"pre", "code"}:
+                    # Inside pre/code escape foreign closing tags as text
+                    escaped = escape_tag_text(tag_full)
+                    if len(current_chunk) + len(escaped) > allowed_total:
+                        current_chunk += close_open_tags()
+                        chunks.append(current_chunk)
+                        current_chunk = reopen_tags()
+                    current_chunk += escaped
+                else:
+                    # Outside pre/code: normalize nesting by auto-closing tags down to target.
+                    # Find the target tag in the stack (from the end). If not found — escape as text.
+                    target_idx = None
+                    for idx in range(len(open_stack) - 1, -1, -1):
+                        if open_stack[idx]['name'] == tag_name:
+                            target_idx = idx
+                            break
+                    if target_idx is None:
+                        escaped = escape_tag_text(tag_full)
+                        if len(current_chunk) + len(escaped) > allowed_total:
+                            current_chunk += close_open_tags()
+                            chunks.append(current_chunk)
+                            current_chunk = reopen_tags()
+                        current_chunk += escaped
+                    else:
+                        # Close all tags above the target sequentially
+                        names_above = [open_stack[i]['name'] for i in range(len(open_stack) - 1, target_idx, -1)]
+                        estimated = sum(len(f"</{n}>") for n in names_above) + (end_tag - start_tag)
+                        if len(current_chunk) + estimated > allowed_total:
+                            # Start a new chunk before emitting the closing sequence to stay within budget
+                            current_chunk += close_open_tags()
+                            chunks.append(current_chunk)
+                            current_chunk = reopen_tags()
+                        # Emit the closing tags for the ones above the target
+                        for n in names_above:
+                            current_chunk += f"</{n}>"
+                            open_stack.pop()
+                        # Finally append the original closing tag for the target and pop it
+                        current_chunk += tag_full
+                        open_stack.pop()  # снимаем целевой тег
+        else:
+            # Opening tag
+            # If we are inside pre/code and encounter a non pre/code tag — escape as text, do not push to stack
+            if open_stack and open_stack[-1]['name'] in {"pre", "code"} and tag_name not in {"pre", "code"}:
+                escaped_open = escape_tag_text(tag_full)
+                if len(current_chunk) + len(escaped_open) > allowed_total:
+                    current_chunk += close_open_tags()
+                    chunks.append(current_chunk)
+                    current_chunk = reopen_tags()
+                current_chunk += escaped_open
+            else:
+                if len(current_chunk) + (end_tag - start_tag) > allowed_total:
+                    current_chunk += close_open_tags()
+                    chunks.append(current_chunk)
+                    current_chunk = reopen_tags()
 
-            current_chunk += tag_full
-            position = end
+                current_chunk += tag_full
 
+                # Do not push self-closing tags to the stack
+                if not is_self_closing(tag_name, tag_full):
+                    # Save the original opening form with attributes.
+                    # Special case blockquote expandable — keep as-is.
+                    opening = tag_full
+                    open_stack.append({
+                        'name': tag_name,
+                        'open': opening,
+                    })
+
+        position = end_tag
+
+    # Finalization
     if current_chunk:
         current_chunk += close_open_tags()
         chunks.append(current_chunk)
