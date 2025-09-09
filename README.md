@@ -1,4 +1,4 @@
-# 😈 evi-run — Customizable Multi-Agent AI System
+# 🦄 evi-run — Customizable Multi-Agent AI System
 
 <div align="center">
 
