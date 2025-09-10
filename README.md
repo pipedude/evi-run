@@ -216,43 +216,13 @@ Leverage the framework to build specialized AI agents for any domain or industry
 
 ### 🔬 Model Selection & Configuration
 
-By default, the system is configured for optimal performance and low cost of use. For professional and specialized use cases, proper model selection is crucial for optimal performance and cost efficiency.
-
-#### Customizing for Professional Deep Research
-
-**For Deep Research and Complex Analysis:**
-- **`o3-deep-research`** - Most powerful deep research model for complex multi-step research tasks
-- **`o4-mini-deep-research`** - Faster, more affordable deep research model
-
-For **maximum research capabilities** using specialized deep research models:
-
-1. **Use o3-deep-research for most powerful analysis** in `bot/agents_tools/agents_.py`:
-   ```python
-   deep_agent = Agent(
-       name="Deep Agent",
-       model="o3-deep-research",  # Most powerful deep research model
-       # ... instructions
-   )
-   ```
-
-2. **Alternative: Use o4-mini-deep-research for cost-effective deep research:**
-   ```python
-   deep_agent = Agent(
-       name="Deep Agent",
-       model="o4-mini-deep-research",  # Faster, more affordable deep research
-       # ... instructions
-   )
-   ```
-
-3. **Update Main Agent instructions** to prevent summarization:
-   - Locate the main agent instructions in the same file
-   - Ensure the instruction includes: *"VERY IMPORTANT! Do not generalize the answers received from the deep_knowledge tool, especially for deep research, provide them to the user in full, in the user's language."*
+By default, the system is configured for optimal performance and low cost of use. For professional and specialized use cases, proper model selection is crucial for optimal performance and cost efficiency. Choose models for your use cases and tasks.
 
 #### Available Models
 
 For the complete list of available models, capabilities, and pricing, see the **[OpenAI Models Documentation](https://platform.openai.com/docs/models)**.
 
-### Adding Custom Agents
+### 🧑‍💻 Adding Custom Agents
 
 evi-run uses the **Agents** library with a multi-agent architecture where specialized agents are integrated as tools into the main agent. All agent configuration is centralized in:
 
