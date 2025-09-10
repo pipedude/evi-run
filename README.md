@@ -279,7 +279,7 @@ Edit the detailed instructions in the `main_agent` instructions block:
 - `tools`: Available tools (WebSearchTool, FileSearchTool, etc.)
 - `mcp_servers`: MCP server connections
 
-#### 🤖 Using Alternative Models
+### 🤖 Using Alternative Models
 
 evi-run supports non-OpenAI models through the Agents library. There are several ways to integrate other LLM providers:
 
@@ -343,7 +343,7 @@ set_default_openai_client(AsyncOpenAI(
 - If not using OpenAI, consider disabling tracing: `set_tracing_disabled()`
 - You can mix different providers for different agents
 
-#### 🎯 Best Practices
+### 🎯 Best Practices
 
 - **Focused Instructions**: Each agent should have a clear, specific purpose
 - **Model Selection**: Use appropriate models for complexity (gpt-5 vs gpt-5-mini)
@@ -351,7 +351,7 @@ set_default_openai_client(AsyncOpenAI(
 - **Naming Convention**: Use descriptive tool names for main agent clarity
 - **Testing**: Test agent responses in isolation before integration
 
-#### 🌐 Bot Messages Localization
+### 🌐 Bot Messages Localization
 
 **Customizing Bot Interface Messages:**
 
