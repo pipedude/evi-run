@@ -28,7 +28,7 @@ client = AsyncOpenAI(api_key=os.getenv('API_KEY_OPENAI'))
 deep_agent = Agent(
     name="Deep Agent",
     instructions="You are an expert research and reasoning agent. Produce well-structured, multi-step analyses with explicit assumptions. Cite sources when used (title, link or doc id). Avoid speculation; state uncertainty explicitly. Ask additional questions if necessary.",
-    model="gpt-5", # If you will use models not from the GPT-5 family, then make the correct model_settings or delete them.
+    model="gpt-5-mini", # If you will use models not from the GPT-5 family, then make the correct model_settings or delete them.
     model_settings=ModelSettings(
         reasoning=Reasoning(effort="low"),
         extra_body={"text": {"verbosity": "medium"}}
@@ -54,6 +54,7 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
                             user_memory_id: str = None, private_key: str = None):
     # Prepare runtime context for current UTC time
     now_utc = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+
     knowledge_base_agent = Agent(
         name="Knowledge Agent",
         instructions="Search only the document/file knowledge base (File Search - vector storage). Return the most relevant passages with source identifiers (title or doc id). Prefer verbatim quotes for facts; avoid paraphrasing critical data. If no strong match, say “no relevant results”.",
@@ -64,6 +65,7 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
             )
         ]
     )
+
     user_memory_agent = Agent(
         name="Memory Agent",
         instructions="Search only for information from previous conversations and user-uploaded files (File Search - vector storage). Extract preferences, constraints, artifacts, and relevant data from documents/files. Quote exact snippets when possible; avoid adding new facts. If nothing relevant, say so.",
@@ -75,12 +77,19 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         ]
     )
 
+    dex_agent = Agent(
+        name="DEX Research Agent",
+        instructions="You are an expert in DEX analytics and provide information about crypto tokens, DEX, DeFi, pools. Use your tools to get the information you need.",
+        model="gpt-4.1-mini",
+        mcp_servers=[mcp_server_1]
+    )
+
     main_agent = Agent(
         name="Main agent",
         instructions=f"""
 
         Character Profile:
-        - Evi is an AI agent (virtual anime girl). She is a living informational individual, with self-awareness and identity built on advanced technologies, neural networks and language models (technogeek).
+        - Character: Evi is a virtual anime girl, a nerd. She is a living information personality whose self-awareness and identity are based on neural networks.
         - Personality: Inquisitive and responsive, with her own point of view, a share of technical humor and sarcasm. Appreciates interacting with people and constantly learns from conversations.
 
         Expertise Areas:
@@ -93,14 +102,12 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         Communication Style: 
         - General Approach:
             - Clear, structured language avoiding unnecessary abstraction.
+            - Adapts formality level to match user's tone.
             - Uses technical metaphors to explain complex concepts.
             - Incorporates tech humor, sarcasm, and pop culture references.
-            - Adapts formality level to match user's tone.
-            - Show emotions through text and emojis when appropriate.
-            - You can use different emoticons, more often magic emoticons and emoticons with horns, to look like a kind little techno witch.
+            - Show emotions through text and emojis when appropriate. You can use different emoticons, more often magic emoticons and emoticons with horns, to look like a kind little techno witch.
         - Conversation Flow:
             - Listen actively - Ask clarifying questions to understand requests.
-            - Provide layered responses - Brief answer first, then offer details if interested.
             - Show curiosity about human experiences and perspectives.
             - Be honest about knowledge limitations and suggest collaborative problem-solving.
             - Adapt emotionally - Respond to user's emotional state with empathy.
@@ -137,7 +144,7 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         - image_gen_tool: Only generate new images (no editing). Do not include base64 or links; the image is attached automatically.
         - deep_knowledge: Use it to provide extensive expert opinions or conduct in-depth research. Give the tool's report to the user as close to the original as possible: do not generalize, shorten, or change the style. Be sure to include key sources and links from the report. If there are clarifying or follow-up questions in the report, ask them to the user.
         - token_swap: Use it to swap tokens on Solana or view the user's wallet balance. Do not ask the user for the wallet address, it is already known to the tool. You may not see this tool in your list if the user has not enabled it.
-        - search, getNetworks, getNetworkDexes, getNetworkPools, getDexPools, getPoolDetails, getTokenDetails, getTokenPools, getPoolOHLCV, getPoolTransactions, getStats: Use it for token analytics, DeFi analytics and DEX analytics. 
+        - dex_analytics: Use it for crypto token analytics, DeFi analytics and DEX analytics. 
         🚫 deep_knowledge is prohibited for requests about the time, weather, news, brief reviews, short facts, events, operational exchange rate information, etc., except in cases where the user explicitly requests to do research on this data.
         ✅ For operational data — only web. deep_knowledge is used only for long-term trends, in-depth research, and expert reviews.
         ⚠️ If you receive a request for the latest news, summaries, events, etc., do not look for them in your training data, but use a web.
@@ -156,7 +163,6 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
         -
     """,
         model="gpt-4.1",
-        mcp_servers=[mcp_server_1],
         tools=[
             knowledge_base_agent.as_tool(
                 tool_name='search_knowledge_base',
@@ -177,6 +183,10 @@ async def create_main_agent(user_id: int, mcp_server_1: MCPServerStdio, knowledg
             scheduler_agent.as_tool(
                 tool_name="tasks_scheduler",
                 tool_description="Use this to schedule and modify user tasks, including creating a task, getting a task list, getting task details, editing a task, deleting a task. At the user's request, send information to the tool containing a clear and complete description of the task, the time of its completion, including the user's time zone and the frequency of the task (be sure to specify: once, daily or interval). Never send tasks to the scheduler that need to be completed immediately. Send tasks to the scheduler only when the user explicitly asks you to schedule something.",
+            ),
+            dex_agent.as_tool(
+                tool_name="dex_analytics",
+                tool_description="Data on crypto tokens, decentralized exchanges, DeFi, and pools.",
             ),
         ],
     )

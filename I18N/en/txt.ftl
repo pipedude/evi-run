@@ -1,19 +1,17 @@
 start_text = 
-    I'm Evi — a virtual techno witch...😅lol, actually I'm a multi-agent system with artificial intelligence and I know practically everything about this... and other worlds! 😈✨
-
-    I can complete various tasks and assignments for you, or we can just have fun chatting. 🦄👻
+    I am Evi — your AI assistant and a bit of a virtual techno-witch... 🦄👻
 
     My capabilities include (but are not limited to):
-    - solving complex, multi-step tasks;
-    - conducting deep research;
-    - intelligent web search;
-    - document and image analysis;
-    - image creation;
-    - DEX analytics and Solana token swapping.
+    - solving complex, multi-step tasks
+    - conducting deep research
+    - intelligent web search
+    - document and image analysis
+    - image generation
+    - DEX analytics and Solana token swap
+    - task scheduler
+    - memory management
 
-    I can schedule task execution for the time you need or with a specific frequency. I have customizable memory and I remember important information from our conversations. You can also delete the history of our conversations or add new knowledge to my memory. 🧙‍♀️🔮
-
-    Just write your requests in chat in natural language or send voice messages to start interacting! 🪄✨
+    Simply write your requests in the chat using natural language or send voice messages to start interacting! 🔮✨
 
     ⚠️ Tip! Periodically reset the conversation context with the /new command — this will help save tokens and speed up request processing.
 
@@ -49,7 +47,9 @@ command_wallet_text =
 cmd_help_text = 
     Interact with the system through the chat window. All functions are available through regular messages. Use Menu for additional parameter settings.
 
-command_settings_text = Settings
+    For advanced system and character customization, edit the file: <code>\bot\agents_tools\agents_</code>
+
+command_settings_text = Settings:
 
 settings_language_text = Interface language
 
