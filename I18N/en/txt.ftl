@@ -1,7 +1,7 @@
 start_text = 
-    I am Evi — your AI assistant and a bit of a virtual techno-witch... 🦄👻
+    I am Evi — a virtual technomage and your AI agent... 🦄👻
 
-    My capabilities include (but are not limited to):
+    My technomagic powers include (but are not limited to):
     - solving complex, multi-step tasks
     - conducting deep research
     - intelligent web search
