@@ -97,7 +97,7 @@ async def text_input(message: Message, user_repo: UserRepository, utils_repo: Ut
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
+        if message.from_user.id != ADMIN_ID and message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:
@@ -114,7 +114,7 @@ async def photo_input(message: Message, user_repo: UserRepository, utils_repo: U
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
+        if message.from_user.id != ADMIN_ID and message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:
@@ -131,7 +131,7 @@ async def input_voice(message: Message, user_repo: UserRepository, utils_repo: U
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
+        if message.from_user.id != ADMIN_ID and message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:
@@ -160,7 +160,7 @@ async def input_document(message: Message, user_repo: UserRepository, utils_repo
     if await redis.get(f'request_{message.from_user.id}'):
         return
     if TYPE_USAGE == 'private':
-        if message.from_user.id != ADMIN_ID or message.from_user.id not in ADMINS_LIST:
+        if message.from_user.id != ADMIN_ID and message.from_user.id not in ADMINS_LIST:
             return
     else:
         if user.balance_credits <= 0:

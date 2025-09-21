@@ -27,6 +27,7 @@ __MACOSX/
 
 # Local tests (excluded from VCS as requested)
 tests/
+crypto mode/
 
 # Pytest artifacts
 .pytest_cache/
