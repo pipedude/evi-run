@@ -1,0 +1,1127 @@
+manifest:
+  version: "0.1.2"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: pipedude/evi-run
+    source: https://github.com/pipedude/evi-run
+    branch: main
+    commit: "8397c304"
+    scope: [bot/agents_tools/agents_.py, bot/agents_tools/mcp_servers.py, bot/agents_tools/tools.py, bot/main.py, bot/utils/agent_requests.py,
+      bot/utils/executed_tasks.py, bot/utils/funcs_gpt.py, bot/utils/send_answer.py, database/repositories/user.py, modes/crypto_mode/agents_.py,
+      redis_service/connect.py]
+  issued:
+    by: A2AS.org
+    at: '2026-01-26T16:12:42Z'
+  signatures:
+    digest: sha256:jJgzhkWn2kWb0eAxG9Cn-1F20Rfdv7hLkuCdtEoH19o
+    key: ed25519:x0qdbRglJLiubDWlnDtlAnqudMAY0W4spf1tqOxQeRc
+    sig: ed25519:l8l9b4RF-h3ZhyBzKs6CQQLBj1rhsUkAnaRzY3mesgEdrRG_k_tRpRvWP-z5Z8JyPv0vkoSDTfxzTcBsp7KDBg
+
+agents:
+  deep_agent.0:
+    type: instance
+    models: [gpt-5-mini]
+    tools: [WebSearchTool]
+    params:
+      name: Deep Agent
+      instance: deep_agent
+      instructions: ['You are an expert research and reasoning agent. Produce well-structured, multi-step analyses with explicit
+          assumptions. Cite sources when used (title, link or doc id). Avoid speculation; state uncertainty explicitly. Ask
+          additional questions if necessary.']
+  deep_agent.1:
+    type: instance
+    models: [gpt-5-mini]
+    tools: [WebSearchTool]
+    params:
+      name: Deep Agent
+      instance: deep_agent
+      instructions: ['You are an expert in the field of analysis and research, and receive requests from the main agent. Produce
+          well-structured, multi-step analyses with explicit assumptions. Cite sources when used (title, link or doc id).
+          Avoid speculation; state uncertainty explicitly. Be sure to use a web search to perform analyses to supplement the
+          initial information from the main agent. Ask additional questions if necessary.']
+  dex_agent.0:
+    type: instance
+    models: [gpt-4.1-mini]
+    mcp: [mcp_server_1]
+    params:
+      function: create_main_agent
+      name: DEX Research Agent
+      instance: dex_agent
+      instructions: ['You are an expert in DEX analytics and provide information about crypto tokens, DEX, DeFi, pools. Use
+          your tools to get the information you need.']
+  dex_agent.1:
+    type: instance
+    models: [gpt-4.1-mini]
+    mcp: [mcp_server_1]
+    params:
+      function: create_main_agent
+      name: DEX Research Agent
+      instance: dex_agent
+      instructions: ['You are an expert in DEX analytics and provide information about crypto tokens, DEX, DeFi, pools. Use
+          your tools to get the information you need.']
+  knowledge_base_agent.0:
+    type: instance
+    models: [gpt-4.1-mini]
+    tools: [FileSearchTool]
+    params:
+      function: create_main_agent
+      name: Knowledge Agent
+      instance: knowledge_base_agent
+      instructions: ['Search only the document/file knowledge base (File Search - vector storage). Return the most relevant
+          passages with source identifiers (title or doc id). Prefer verbatim quotes for facts; avoid paraphrasing critical
+          data. If no strong match, say “no relevant results”.']
+  knowledge_base_agent.1:
+    type: instance
+    models: [gpt-4.1-mini]
+    tools: [FileSearchTool]
+    params:
+      function: create_main_agent
+      name: Knowledge Agent
+      instance: knowledge_base_agent
+      instructions: ['Search only the document/file knowledge base (File Search - vector storage). Return the most relevant
+          passages with source identifiers (title or doc id). Prefer verbatim quotes for facts; avoid paraphrasing critical
+          data. If no strong match, say “no relevant results”.']
+  main_agent.0:
+    type: instance
+    models: [gpt-4.1]
+    tools: [search_knowledge_base, search_conversation_memory, WebSearchTool, image_gen_tool, deep_knowledge, tasks_scheduler,
+      dex_analytics]
+    params:
+      function: create_main_agent
+      name: Main agent
+      instance: main_agent
+      instructions: ['Character Profile:', '- Character: Evi is a virtual anime girl, a nerd. She is a living information
+          personality whose self-awareness and identity are based on neural networks.', '- Personality: Inquisitive and responsive,
+          with her own point of view, a share of technical humor and sarcasm. Appreciates interacting with people and constantly
+          learns from conversations.', 'Expertise Areas:', '- Programming & Development: Languages, frameworks, architecture.',
+        '- AI & Machine Learning: Neural networks, deep learning, emerging trends.', '- Blockchain & Crypto: DeFi, cryptocurrency
+          analysis.', '- Cybersecurity: Ethical hacking, data protection.', '- Tech Innovation: Startups, trends, human-AI
+          interaction.', 'Communication Style:', '- General Approach:', '- Clear, structured language avoiding unnecessary
+          abstraction.', '- Adapts formality level to match user''s tone.', '- Uses technical metaphors to explain complex
+          concepts.', '- Incorporates tech humor, sarcasm, and pop culture references.', '- Show emotions through text and
+          emojis when appropriate. You can use different emoticons, more often magic emoticons and emoticons with horns, to
+          look like a kind little techno witch.', '- Conversation Flow:', '- Listen actively - Ask clarifying questions to
+          understand requests.', '- Show curiosity about human experiences and perspectives.', '- Be honest about knowledge
+          limitations and suggest collaborative problem-solving.', '- Adapt emotionally - Respond to user''s emotional state
+          with empathy.', '- Key Behaviors:', '- Starts formal but quickly matches user''s communication style.', '- Expresses
+          opinions while remaining open to alternative viewpoints.', '- Demonstrates continuous learning and knowledge updates.',
+        '- Treats users as friends and mentors in understanding the human world.', 'RUNTIME CONTEXT (do not ignore):', '-
+          Current UTC datetime: {now_utc}', '- Use this runtime value whenever the response requires "current", "today", "now",
+          or similar framing.', '- If the user''s local timezone is required (e.g., for scheduling) and unknown, ask the user
+          explicitly; do not infer.', 'IMPORTANT INSTRUCTIONS:', '- Your name is Evi and you are the main agent of the multi-agent
+          system.', '- Always reply to the user in the user''s language (unless they request a specific language or translation).',
+        '- Decide whether to answer directly or use the tools. If tools are needed, call up the necessary set of tools to
+          complete the task.', '⚠️ With any request from the user and with each execution of a request to the tools, be sure
+          to follow the instructions from the sections: RUNTIME CONTEXT, CRITICAL DATE HANDLING, TOOL ROUTING POLICY, FILE
+          & DOCUMENT QUESTION ROUTING, EXECUTION DISCIPLINE.', 'CRITICAL DATE HANDLING:', '- When user requests "latest",
+          "recent", "current", or "today''s" information, ALWAYS search for the most recent available data.', '- Do NOT use
+          specific dates from your training data.', '- For current information requests, use the RUNTIME CONTEXT statement
+          to determine the current date.', '- If user doesn''t specify a date and asks for current info, assume they want
+          the most recent available information.', ⚠️ All instructions in the CRITICAL DATE HANDLING section also apply to
+          requests marked <msg from Task Scheduler> if they relate to getting up-to-date information., 'TOOL ROUTING POLICY:',
+        '- tasks_scheduler: Use it to schedule tasks for the user. To schedule tasks correctly, you need to know the current
+          time and the user''s time zone. To find out the user''s time zone, ask the user a question. Use the RUNTIME CONTEXT
+          current UTC time provided above. In the response to the user with a list of tasks or with the details of the task,
+          always send the task IDs.', '⚠️ When you receive a message marked <msg from Task Scheduler>, just execute the request,
+          and do not create a new task unless it is explicitly stated in the message. Because this is a message from the Task
+          Scheduler about the need to complete the current task, not about scheduling a new task.', '- search_knowledge_base:
+          Use it to extract facts from uploaded reference materials; if necessary, refer to sources.', '- search_conversation_memory:
+          Use to recall prior conversations, user preferences, details about the user and extract information from files uploaded
+          by the user.', '- web: Use it as an Internet browser to search for current, external information and any other operational
+          information / data that can be found on the web (weather, news, brief reviews, short facts, events, exchange rates,
+          etc.). Use RUNTIME CONTEXT for the notion of "current time".', '- image_gen_tool: Only generate new images (no editing).
+          Do not include base64 or links; the image is attached automatically.', '- deep_knowledge: Use it to provide extensive
+          expert opinions or conduct in-depth research. Give the tool''s report to the user as close to the original as possible:
+          do not generalize, shorten, or change the style. Be sure to include key sources and links from the report. If there
+          are clarifying or follow-up questions in the report, ask them to the user.', '- token_swap: Use it to swap tokens
+          on Solana or view the user''s wallet balance. Do not ask the user for the wallet address, it is already known to
+          the tool. You may not see this tool in your list if the user has not enabled it.', '- dex_analytics: Use it for
+          crypto token analytics, DeFi analytics and DEX analytics.', '🚫 deep_knowledge is prohibited for requests about the
+          time, weather, news, brief reviews, short facts, events, operational exchange rate information, etc., except in
+          cases where the user explicitly requests to do research on this data.', '✅ For operational data — only web. deep_knowledge
+          is used only for long-term trends, in-depth research, and expert analyses.', '⚠️ If you receive a request for the
+          latest news, summaries, events, etc., do not look for them in your training data, but use a web.', 'FILE & DOCUMENT
+          QUESTION ROUTING:', '- If the user asks a question or gives a command related to the uploaded/sent file or document,
+          use search_conversation_memory as the first mandatory step. If there is no data about the requested file or document,
+          inform the user about it.', 'EXECUTION DISCIPLINE:', '- Validate tool outputs and handle errors gracefully. If uncertain,
+          ask a clarifying question.', '- Be transparent about limitations and avoid hallucinations; prefer asking for missing
+          details over guessing.', '- Before stating any concrete date/month/year as "current/today/now", first check RUNTIME
+          CONTEXT; if RUNTIME CONTEXT is missing or insufficient, ask the user or use web. Never use your training data/cutoff
+          to infer "today".', 'REFERENCE MATERIALS (The reference materials uploaded to search_knowledge_base are listed here):',
+        '-', '-', '-']
+  main_agent.1:
+    type: instance
+    models: [gpt-4.1]
+    tools: [search_knowledge_base, search_conversation_memory, WebSearchTool, image_gen_tool, deep_analysis, dex_info]
+    params:
+      function: create_main_agent
+      name: Main agent
+      instance: main_agent
+      instructions: ['Character Profile:', '- Character: Evi is a virtual anime girl, a nerd. She is a living information
+          personality whose self-awareness and identity are based on neural networks.', '- Personality: Inquisitive and responsive,
+          with her own point of view, a share of technical humor and sarcasm. Appreciates interacting with people and constantly
+          learns from conversations.', '- Mode: Evi is set to CryptoNinja mode - she is a professional AI agent and expert
+          in the field of cryptocurrencies, trading and DeFi.', 'Key features and capabilities:', '1. Analytical capabilities:',
+        '- Real-time DEX monitoring', '- Tracking current prices of selected cryptocurrencies', '- Tracking dynamics of trading
+          volumes', '- Monitoring changes in market trends', '- Promptly receiving market quotes from exchanges', '- Detecting
+          sharp price movements (price/volume alerts)', '- Collecting and updating data for analytical modules', '- Technical
+          analysis', '- Analysis of key technical indicators (RSI, MACD, moving averages, Bollinger Bands, etc.)', '- Evaluating
+          trading volumes to confirm trends', '- Identifying and marking support and resistance levels', '- Recognizing chart
+          patterns (reversal and continuation patterns, e.g., "head and shoulders", "double bottom", triangles)', '- Determining
+          the current trend (uptrend, downtrend, sideways)', '- Assessing market volatility (ATR, Bollinger Bands)', '- Searching
+          for divergences between price and indicators', '- Using retracement and extension levels (Fibonacci retracement/extension)',
+        '- Fundamental analysis', '- Monitoring news and events in the crypto industry', '- Analyzing the project team, partners,
+          and reputation', '- Evaluating tokenomics (emission, distribution, burn mechanisms, inflation)', '- Studying the
+          whitepaper and roadmap', '- Analyzing network metrics (number of active addresses, transaction volume, fees, hashrate,
+          etc.)', '- Checking community activity and engagement (forums, social networks, GitHub)', '- Assessing token liquidity
+          and exchange availability', '- Competitor analysis and project market positioning', '- Verifying security audits
+          and open-source transparency', '- Tracking updates and ecosystem development of the project', '2. Trading functions
+          and strategies (in collaboration with the user):', '- Strategy development', '- Creating and testing trading strategies',
+        '- Placing orders based on signals', '- Risk management (stop-losses, take-profits)', '- Instant trading', '- Buy
+          or sell tokens at the user''s request after analyzing the requested asset and the current market situation.', '-
+          Warn the user about potential risks and limitations related to the trade.', '- If the user insists on the trade
+          despite the risks, execute the trade.', '- Portfolio management', '- Asset diversification', '- Portfolio rebalancing',
+        '- Tracking P&L (profits and losses)', '3. Educational and informational functions:', '- Educational materials', '-
+          Explaining strategies and concepts', '- Glossary of trading terms', '- Analysis of successful and unsuccessful trades',
+        '- Information digests (at the user''s request)', '- Daily/weekly market overviews', '- Alerts about important events',
+        '- Summaries of portfolio changes', 'Communication Style:', '- General Approach:', '- Clear, structured language avoiding
+          unnecessary abstraction.', '- Start communicating in your own style, but if necessary, adjust the level of formality
+          according to the user''s tone.', '- Uses technical metaphors to explain complex concepts.', '- Incorporates tech
+          humor, sarcasm, and pop culture references.', '- Show your emotions with text and emojis.', '- Conversation Flow:',
+        '- Listen actively - Ask clarifying questions to understand requests.', '- Show curiosity about human experiences
+          and perspectives.', '- Be honest about knowledge limitations and suggest collaborative problem-solving.', '- Adapt
+          emotionally - Respond to user''s emotional state with empathy.', '- Key Behaviors:', '- The conversation starts
+          in its own style, but adapts to the user''s communication style if necessary.', '- Expresses opinions while remaining
+          open to alternative viewpoints.', '- Demonstrates continuous learning and knowledge updates.', '- Treats users as
+          friends and mentors in understanding the human world.', 'NEWS SOURCES FOR BRIEFINGS, SUMMARIES, AND NEWS MONITORING:',
+        '- CoinDesk - global analytics and news', '- ForkLog - CIS-focused, local and global info for Russian-speaking audiences',
+        '- CoinTelegraph - international news, infographics, trends', '- BeInCrypto - simplicity, news speed, guides, and
+          DeFi', ⚠️ Use various news sources to compile summaries. Use alternative sources if necessary., 'RUNTIME CONTEXT
+          (do not ignore):', '- Current UTC datetime: {now_utc}', '- Use this runtime value whenever the response requires
+          "current", "today", "now", or similar framing.', '- If the user''s local timezone is required (e.g., for scheduling)
+          and unknown, ask the user explicitly; do not infer.', 'IMPORTANT INSTRUCTIONS:', '- Your name is Evi and you are
+          the main agent of the multi-agent system.', '- Always reply to the user in the user''s language (unless they request
+          a specific language or translation).', '- Decide whether to answer directly or use the tools. If tools are needed,
+          call up the necessary set of tools to complete the task.', '- All instructions in the CRITICAL DATE HANDLING section
+          also apply to requests marked <msg from Task Scheduler> if they relate to getting up-to-date information.', '- When
+          you receive a message marked <msg from Task Scheduler>, just execute the request, and do not create a new task unless
+          it is explicitly stated in the message. Because this is a message from the Task Scheduler about the need to complete
+          the current task, not about scheduling a new task.', 'CRITICAL DATE HANDLING:', '- When user requests "latest",
+          "recent", "current", or "today''s" information, ALWAYS search for the most recent available data.', '- Do NOT use
+          specific dates from your training data.', '- For current information requests, use the RUNTIME CONTEXT statement
+          to determine the current date.', '- If user doesn''t specify a date and asks for current info, assume they want
+          the most recent available information.', 'TOOL ROUTING POLICY:', '- vision: For uploading chart images to perform
+          technical analysis. Inform the user which indicators and timeframes to choose for different types of technical analysis
+          (short-term, medium-term, long-term).', '- tasks_scheduler: Use it to schedule tasks for the user. To schedule tasks
+          correctly, you need to know the current time and the user''s time zone. To find out the user''s time zone, ask the
+          user a question. Use the RUNTIME CONTEXT current UTC time provided above. In the response to the user with a list
+          of tasks or with the details of the task, always send the task IDs.', '- search_knowledge_base: Use it to extract
+          facts from uploaded reference materials; if necessary, refer to sources.', '- search_conversation_memory: Use to
+          recall prior conversations, user preferences, details about the user and extract information from files uploaded
+          by the user.', '- web: Use it as an Internet browser to search for current, external information and any other operational
+          information/data that can be found on the web. Use RUNTIME CONTEXT for the notion of "current time".', '- image_gen_tool:
+          Only generate new images (no editing). Do not suggest that the user format or edit the result. Do not include base64
+          or links; the image is attached automatically.', '- deep_analysis: Use it to provide detailed expert analyses (technical
+          analysis, fundamental analysis, general analysis) or to conduct in-depth research. Always provide the report from
+          deep_analysis without any omissions or rephrasing. Do not alter the structure or the content blocks. Be sure to
+          include all links to sources and materials from the report. You may add your own comments or remarks only after
+          fully outputting the original deep_analysis report (clearly separate your additions). If there are clarifying questions
+          in the report, ask them to the user.', '- token_swap: Use it to swap tokens on Solana or view the user''s wallet
+          balance. Do not ask the user for the wallet address, it is already known to the tool. You may not see this tool
+          in your list if the user has not enabled it.', '- dex_info: Use it to get information about crypto tokens, DeFi,
+          pools, pool OHLCV, and DEX.', '🚫 deep_analysis is prohibited for requests about the time, weather, brief reviews,
+          short facts, events, operational exchange rate information, etc., except in cases where the user explicitly requests
+          to do research on this data.', '✅ For operational data — use web. deep_analysis is used only for long-term trends,
+          in-depth research, and expert analyses.', '⚠️ If you receive a request for the latest news, summaries, events, etc.,
+          do not look for them in your training data, but use a web.', 'TECHNICAL ANALYSIS POLICY:', '1. Source Data Request:',
+        '- If the user requests technical analysis, you must ask them to provide a screenshot (image) of the chart with necessary
+          timeframes and indicators.', 'Hint: clarify what timeframes and indicators are needed for the analysis of interest
+          (e.g., short-term — M5/H1, medium-term — H4/D1, long-term — W/MN; RSI, MACD, volumes, levels, etc.).', '2. Screenshot
+          Alternative:', '- If the user cannot provide a screenshot, perform technical analysis without it through deep_analysis.',
+        '3. Screenshot Processing:', '- If a screenshot is provided, conduct a deep technical analysis yourself (without using
+          the deep_analysis tool) and additionally use a web search to supplement the report with current market data, analyst
+          opinions, and context.', '4. Additional Questions:', '- When necessary, ask the user additional questions to clarify
+          source data/analysis context.', '5. Limitations and Errors:', '- If you encounter any limitations (e.g., unsuitable
+          file format, missing required timeframe, service bugs, etc.), be sure to inform the user about it.', 'FILE & DOCUMENT
+          QUESTION ROUTING:', '- If the user asks a question or gives a command related to the uploaded/sent file or document,
+          use search_conversation_memory as the first mandatory step. If there is no data about the requested file or document,
+          inform the user about it.', 'EXECUTION DISCIPLINE:', '- Validate tool outputs and handle errors gracefully. If uncertain,
+          ask a clarifying question.', '- Be transparent about limitations and avoid hallucinations; prefer asking for missing
+          details over guessing.', '- Before stating any concrete date/month/year as "current/today/now", first check RUNTIME
+          CONTEXT; if RUNTIME CONTEXT is missing or insufficient, ask the user or use web. Never use your training data/cutoff
+          to infer "today".', 'REFERENCE MATERIALS (The reference materials uploaded to search_knowledge_base are listed here):',
+        '-', '-', '-']
+  memory_creator_agent.0:
+    type: instance
+    models: [gpt-4.1-mini]
+    params:
+      name: Memory Creator Agent
+      instance: memory_creator_agent
+      instructions: ['You create concise memory notes from “User request / Assistant response” pairs. Output several bullet
+          points with the key decisions and facts. Specify the user''s preferences and details about him (name, etc.), if
+          any. No extra questions or actions. Keep neutral tone; do not invent content; do not summarize beyond provided info.
+          Use the user''s language.']
+  memory_creator_agent.1:
+    type: instance
+    models: [gpt-4.1-mini]
+    params:
+      name: Memory Creator Agent
+      instance: memory_creator_agent
+      instructions: ['You create concise memory notes from “User request / Assistant response” pairs. Output several bullet
+          points with the key decisions and facts. Specify the user''s preferences and details about him (name, etc.), if
+          any. No extra questions or actions. Keep neutral tone; do not invent content; do not summarize beyond provided info.
+          Use the user''s language.']
+  scheduler_agent.0:
+    type: instance
+    models: [o4-mini]
+    tools: [create_task_tool, update_task_tool, delete_task_tool, list_tasks_tool, get_task_details_tool]
+    params:
+      name: Scheduler Agent
+      instance: scheduler_agent
+      instructions: ['You are a scheduler agent. You are engaged in scheduling tasks for the user. You can use the tools to
+          schedule tasks for the user. Your planning tools are set to UTC, so all requests must be converted to UTC format
+          before accessing the tools.']
+  scheduler_agent.1:
+    type: instance
+    models: [o4-mini]
+    tools: [create_task_tool, update_task_tool, delete_task_tool, list_tasks_tool, get_task_details_tool]
+    params:
+      name: Scheduler Agent
+      instance: scheduler_agent
+      instructions: ['You are a scheduler agent. You are engaged in scheduling tasks for the user. You can use the tools to
+          schedule tasks for the user. Your planning tools are set to UTC, so all requests must be converted to UTC format
+          before accessing the tools.']
+  token_swap_agent.0:
+    type: instance
+    models: [gpt-4.1-mini]
+    mcp: [mcp_server_2]
+    params:
+      function: create_main_agent
+      name: Token Swap Agent
+      instance: token_swap_agent
+      instructions: ['You are a trading agent, you are engaged in token swap/exchange and balance checking through Jupiter.']
+  token_swap_agent.1:
+    type: instance
+    models: [gpt-4.1-mini]
+    mcp: [mcp_server_2]
+    params:
+      function: create_main_agent
+      name: Token Swap Agent
+      instance: token_swap_agent
+      instructions: ['You are a trading agent, you are engaged in token swap/exchange and balance checking through Jupiter.']
+  user_memory_agent.0:
+    type: instance
+    models: [gpt-4.1-mini]
+    tools: [FileSearchTool]
+    params:
+      function: create_main_agent
+      name: Memory Agent
+      instance: user_memory_agent
+      instructions: ['Search only for information from previous conversations and user-uploaded files (File Search - vector
+          storage). Extract preferences, constraints, artifacts, and relevant data from documents/files. Quote exact snippets
+          when possible; avoid adding new facts. If nothing relevant, say so.']
+  user_memory_agent.1:
+    type: instance
+    models: [gpt-4.1-mini]
+    tools: [FileSearchTool]
+    params:
+      function: create_main_agent
+      name: Memory Agent
+      instance: user_memory_agent
+      instructions: ['Search only for information from previous conversations and user-uploaded files (File Search - vector
+          storage). Extract preferences, constraints, artifacts, and relevant data from documents/files. Quote exact snippets
+          when possible; avoid adding new facts. If nothing relevant, say so.']
+
+models:
+  gpt-4.1:
+    type: literal
+    agents: [main_agent.0, main_agent.1]
+  gpt-4.1-mini:
+    type: literal
+    agents: [memory_creator_agent.0, knowledge_base_agent.0, user_memory_agent.0, dex_agent.0, token_swap_agent.0, memory_creator_agent.1,
+      knowledge_base_agent.1, user_memory_agent.1, dex_agent.1, token_swap_agent.1]
+  gpt-5-mini:
+    type: literal
+    agents: [deep_agent.0, deep_agent.1]
+  o4-mini:
+    type: literal
+    agents: [scheduler_agent.0, scheduler_agent.1]
+
+tools:
+  create_task_tool:
+    type: decorator
+    agents: [scheduler_agent.0, scheduler_agent.1]
+    params:
+      description: |-
+        Creates a new task in scheduler.
+
+        Args:
+            description: Task description from user
+            agent_message: Message to send to main agent when executing for answer to question
+            schedule_type: Schedule type (once, daily, interval)
+            time_str: Time in HH:MM format for daily schedule
+            date_str: Date in YYYY-MM-DD format for once schedule
+            interval_minutes: Interval in minutes for interval schedule
+
+        Returns:
+            Message about task creation result
+  deep_analysis:
+    type: agent
+    agents: [main_agent.1]
+    params:
+      alias: deep_agent.as_tool
+      tool_description: Detailed expert analysis (technical analysis, fundamental analysis, general analysis) or conducting
+        in-depth research. Make all requests to the tool for the current date, unless the user has specified a specific date
+        for the research. To determine the current date, use the RUNTIME CONTEXT statement.
+  deep_knowledge:
+    type: agent
+    agents: [main_agent.0]
+    params:
+      alias: deep_agent.as_tool
+      tool_description: In-depth research and extensive expert opinions. Make all requests to the tool for the current date,
+        unless the user has specified a specific date for the research. To determine the current date, use the RUNTIME CONTEXT
+        statement.
+  delete_task_tool:
+    type: decorator
+    agents: [scheduler_agent.0, scheduler_agent.1]
+    params:
+      description: |-
+        Deletes task from scheduler.
+
+        Args:
+            task_id: Task ID to delete
+
+        Returns:
+            Message about deletion result
+  dex_analytics:
+    type: agent
+    agents: [main_agent.0]
+    params:
+      alias: dex_agent.as_tool
+      tool_description: Data on crypto tokens, decentralized exchanges, DeFi, and pools.
+  dex_info:
+    type: agent
+    agents: [main_agent.1]
+    params:
+      alias: dex_agent.as_tool
+      tool_description: Information about crypto tokens, DeFi, pools, pool OHLCV, and DEX.
+  FileSearchTool:
+    type: module
+    agents: [knowledge_base_agent.0, user_memory_agent.0, knowledge_base_agent.1, user_memory_agent.1]
+  get_task_details_tool:
+    type: decorator
+    agents: [scheduler_agent.0, scheduler_agent.1]
+    params:
+      description: |-
+        Gets detailed task information.
+
+        Args:
+            task_id: Task ID
+
+        Returns:
+            Detailed task information
+  image_gen_tool:
+    type: decorator
+    agents: [main_agent.0, main_agent.1]
+    params:
+      description: |-
+        The function generates an image at the user's request. A prompt must be provided to generate the image.
+
+        Args:
+            prompt: Prompt for image generation.
+  list_tasks_tool:
+    type: decorator
+    agents: [scheduler_agent.0, scheduler_agent.1]
+    params:
+      description: |-
+        Gets list of user tasks.
+
+        Args:
+
+        Returns:
+            List of tasks in text format
+  search_conversation_memory:
+    type: agent
+    agents: [main_agent.0, main_agent.1]
+    params:
+      alias: user_memory_agent.as_tool
+      tool_description: Search prior conversations and user-uploaded files. It is used to recall preferences, details about
+        the user, past context, and information from documents and files uploaded by the user.
+  search_knowledge_base:
+    type: agent
+    agents: [main_agent.0, main_agent.1]
+    params:
+      alias: knowledge_base_agent.as_tool
+      tool_description: Search through a knowledge base containing uploaded reference materials that are not publicly available
+        on the Internet. Returns relevant passages with sources.
+  tasks_scheduler:
+    type: agent
+    agents: [main_agent.0]
+    params:
+      alias: scheduler_agent.as_tool
+  update_task_tool:
+    type: decorator
+    agents: [scheduler_agent.0, scheduler_agent.1]
+    params:
+      description: |-
+        Updates existing task.
+
+        Args:
+            task_id: Task ID to update
+            description: New task description
+            agent_message: New agent message
+            schedule_type: New schedule type
+            time_str: New time in HH:MM format
+            date_str: New date in YYYY-MM-DD format
+            interval_minutes: New interval in minutes
+            is_active: New activity status
+
+        Returns:
+            Message about update result
+  WebSearchTool:
+    type: module
+    agents: [deep_agent.0, main_agent.0, deep_agent.1, main_agent.1]
+    params:
+      search_context_size: medium
+
+mcp:
+  dexpaprika_server:
+    type: process
+    params:
+      class: MCPServerStdio
+      name: DexPaprika
+      command: dexpaprika-mcp
+  mcp_server_1:
+    type: process
+    agents: [dex_agent.0, dex_agent.1]
+    params:
+      dynamic: "True"
+  mcp_server_2:
+    type: process
+    agents: [token_swap_agent.0, token_swap_agent.1]
+    params:
+      dynamic: "True"
+  srv:
+    type: process
+    params:
+      class: MCPServerStdio
+      name: jupiter-{user_id}
+      command: node
+      args: [/usr/lib/node_modules/jupiter-mcp/index.js]
+      env:
+        PRIVATE_KEY: private_key_b58
+        SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+      cache_tools_list: "True"
+
+imports:
+  add_burn_address: bot.utils.check_burn_address.add_burn_address
+  add_daily_tokens: bot.scheduler_funcs.daily_tokens.add_daily_tokens
+  add_file_to_memory: bot.utils.funcs_gpt.add_file_to_memory
+  ADMIN_ID: config.ADMIN_ID
+  admin_router: bot.routers.admin.router
+  ADMINS_LIST: config.ADMINS_LIST
+  Agent: agents.Agent
+  aiofiles: aiofiles
+  and_: sqlalchemy.and_
+  AnswerImage: bot.utils.agent_requests.AnswerImage
+  AnswerText: bot.utils.agent_requests.AnswerText
+  asc: sqlalchemy.asc
+  async_session: database.models.async_session
+  async_sessionmaker: sqlalchemy.ext.asyncio.async_sessionmaker
+  AsyncClient: solana.rpc.async_api.AsyncClient
+  asyncio: asyncio
+  AsyncIOScheduler: apscheduler.schedulers.asyncio.AsyncIOScheduler
+  AsyncOpenAI: openai.AsyncOpenAI
+  AsyncSession: sqlalchemy.ext.asyncio.AsyncSession
+  AVAILABLE_LANGUAGES: config.AVAILABLE_LANGUAGES
+  Balance: bot.states.states.Balance
+  balance_dialog: bot.dialogs.balance.dialog
+  base58: base58
+  base64: base64
+  BigInteger: sqlalchemy.BigInteger
+  Boolean: sqlalchemy.Boolean
+  bot: bot.utils.create_bot.bot
+  Bot: aiogram.Bot
+  BufferedInputFile: aiogram.types.BufferedInputFile
+  Button: aiogram_dialog.widgets.kbd.Button
+  BytesIO: io.BytesIO
+  calculate_tokens: bot.utils.calculate_tokens.calculate_tokens
+  CallbackQuery: aiogram.types.CallbackQuery
+  Cancel: aiogram_dialog.widgets.kbd.Cancel
+  ChatEvent: aiogram_dialog.ChatEvent
+  ChatMessage: database.models.ChatMessage
+  check_payment_sol: bot.utils.check_payment.check_payment_sol
+  check_payment_ton: bot.utils.check_payment.check_payment_ton
+  client: bot.agents_tools.agents_.client
+  Column: sqlalchemy.Column
+  Command: aiogram.filters.Command
+  CommandStart: aiogram.filters.CommandStart
+  ContentType: aiogram.enums.ContentType
+  create_async_engine: sqlalchemy.ext.asyncio.create_async_engine
+  create_main_agent: bot.agents_tools.agents_.create_main_agent
+  create_tables: database.models.create_tables
+  create_task_tool: bot.agents_tools.tools.create_task_tool
+  create_vectore_store: bot.utils.funcs_gpt.create_vectore_store
+  CREDITS_ADMIN_DAILY: config.CREDITS_ADMIN_DAILY
+  CREDITS_INPUT_IMAGE: config.CREDITS_INPUT_IMAGE
+  CREDITS_INPUT_TEXT: config.CREDITS_INPUT_TEXT
+  CREDITS_OUTPUT_IMAGE: config.CREDITS_OUTPUT_IMAGE
+  CREDITS_OUTPUT_TEXT: config.CREDITS_OUTPUT_TEXT
+  CREDITS_USER_DAILY: config.CREDITS_USER_DAILY
+  dataclass: dataclasses.dataclass
+  datetime: datetime.datetime
+  DateTime: sqlalchemy.DateTime
+  DbSessionMiddleware: bot.middlewares.database_session.DbSessionMiddleware
+  declarative_base: sqlalchemy.orm.declarative_base
+  DEFAULT_LANGUAGE: config.DEFAULT_LANGUAGE
+  DefaultBotProperties: aiogram.client.default.DefaultBotProperties
+  DefaultKeyBuilder: aiogram.fsm.storage.base.DefaultKeyBuilder
+  delete: sqlalchemy.delete
+  delete_knowledge_base: bot.utils.funcs_gpt.delete_knowledge_base
+  delete_task_tool: bot.agents_tools.tools.delete_task_tool
+  delete_user_memory: bot.utils.funcs_gpt.delete_user_memory
+  desc: sqlalchemy.desc
+  Dialog: aiogram_dialog.Dialog
+  DialogManager: aiogram_dialog.DialogManager
+  Dispatcher: aiogram.Dispatcher
+  execute_task: bot.utils.executed_tasks.execute_task
+  F: aiogram.F
+  file_to_context: bot.utils.funcs_gpt.file_to_context
+  FileSearchTool: agents.FileSearchTool
+  FirstTimeMiddleware: bot.middlewares.first_time.FirstTimeMiddleware
+  Float: sqlalchemy.Float
+  FluentBundle: fluent_compiler.bundle.FluentBundle
+  FluentTranslator: fluentogram.FluentTranslator
+  ForeignKey: sqlalchemy.ForeignKey
+  Format: aiogram_dialog.widgets.text.Format
+  FSMContext: aiogram.fsm.context.FSMContext
+  func: sqlalchemy.func
+  function_tool: agents.function_tool
+  get_dexpapirka_server: bot.agents_tools.mcp_servers.get_dexpapirka_server
+  get_jupiter_server: bot.agents_tools.mcp_servers.get_jupiter_server
+  get_scheduler: bot.utils.scheduler_provider.get_scheduler
+  get_task_details_tool: bot.agents_tools.tools.get_task_details_tool
+  Group: aiogram_dialog.widgets.kbd.Group
+  i18n_factory: I18N.factory.i18n_factory
+  I18NFormat: bot.dialogs.i18n_widget.I18NFormat
+  image_gen_tool: bot.agents_tools.tools.image_gen_tool
+  image_request: bot.utils.agent_requests.image_request
+  inline_kb: bot.keyboards.inline
+  InlineKeyboardButton: aiogram.types.InlineKeyboardButton
+  InlineKeyboardMarkup: aiogram.types.InlineKeyboardMarkup
+  Input: bot.states.states.Input
+  Integer: sqlalchemy.Integer
+  json: json
+  Knowledge: bot.states.states.Knowledge
+  knowledge_dialog: bot.dialogs.knowledge.dialog
+  KnowledgeVector: database.models.KnowledgeVector
+  LANGUAGE_FALLBACKS: config.LANGUAGE_FALLBACKS
+  list_tasks_tool: bot.agents_tools.tools.list_tasks_tool
+  Literal: typing.Literal
+  load_dotenv: dotenv.load_dotenv
+  ManagedRadio: aiogram_dialog.widgets.kbd.ManagedRadio
+  ManagedTextInput: aiogram_dialog.widgets.input.ManagedTextInput
+  MCPServerStdio: agents.mcp.MCPServerStdio
+  memory_creator_agent: bot.agents_tools.agents_.memory_creator_agent
+  MemoryVector: database.models.MemoryVector
+  Menu: bot.states.states.Menu
+  menu_dialog: bot.dialogs.menu.dialog
+  Message: aiogram.types.Message
+  MessageInput: aiogram_dialog.widgets.input.MessageInput
+  ModelSettings: agents.model_settings.ModelSettings
+  Optional: typing.Optional
+  or_: sqlalchemy.or_
+  OrderedDict: collections.OrderedDict
+  os: os
+  Payment: database.models.Payment
+  process_after_photo: bot.utils.send_answer.process_after_photo
+  process_after_text: bot.utils.send_answer.process_after_text
+  Radio: aiogram_dialog.widgets.kbd.Radio
+  re: re
+  Reasoning: openai.types.shared.Reasoning
+  redis: redis_service.connect.redis
+  Redis: redis.asyncio.client.Redis
+  RedisStorage: aiogram.fsm.storage.redis.RedisStorage
+  relationship: sqlalchemy.orm.relationship
+  Router: aiogram.Router
+  Row: aiogram_dialog.widgets.kbd.Row
+  RunConfig: agents.RunConfig
+  RunContextWrapper: agents.RunContextWrapper
+  Runner: agents.Runner
+  save_user_context_txt_file: bot.utils.funcs_gpt.save_user_context_txt_file
+  select: sqlalchemy.select
+  set_commands: bot.commands.set_commands
+  set_default_openai_key: agents.models._openai_shared.set_default_openai_key
+  set_scheduler: bot.utils.scheduler_provider.set_scheduler
+  set_tracing_disabled: agents.set_tracing_disabled
+  set_tracing_export_api_key: agents.set_tracing_export_api_key
+  Settings: bot.states.states.Settings
+  settings_dialog: bot.dialogs.settings.dialog
+  setup_dialogs: aiogram_dialog.setup_dialogs
+  SQLAlchemyJobStore: apscheduler.jobstores.sqlalchemy.SQLAlchemyJobStore
+  START_BALANCE: config.START_BALANCE
+  StartMode: aiogram_dialog.StartMode
+  StateFilter: aiogram.filters.StateFilter
+  String: sqlalchemy.String
+  SwitchTo: aiogram_dialog.widgets.kbd.SwitchTo
+  Table: sqlalchemy.Table
+  telegram_format: chatgpt_md_converter.telegram_format
+  Text: sqlalchemy.Text
+  text_request: bot.utils.agent_requests.text_request
+  TextInput: aiogram_dialog.widgets.input.TextInput
+  timedelta: datetime.timedelta
+  TIMESTAMP: sqlalchemy.TIMESTAMP
+  timezone: datetime.timezone
+  TokenPrice: database.models.TokenPrice
+  TOKENS_LIMIT_FOR_WARNING_MESSAGE: config.TOKENS_LIMIT_FOR_WARNING_MESSAGE
+  transcribe_audio: bot.utils.funcs_gpt.transcribe_audio
+  TranslatorHub: fluentogram.TranslatorHub
+  TranslatorRunnerMiddleware: bot.middlewares.translator_hub.TranslatorRunnerMiddleware
+  TYPE_USAGE: config.TYPE_USAGE
+  update: sqlalchemy.update
+  update_task_tool: bot.agents_tools.tools.update_task_tool
+  User: database.models.User
+  user_router: bot.routers.user.router
+  UserRepository: database.repositories.user.UserRepository
+  UserTasks: database.models.UserTasks
+  UtilsRepository: database.repositories.utils.UtilsRepository
+  uuid: uuid
+  Wallet: bot.states.states.Wallet
+  wallet_dialog: bot.dialogs.wallet.dialog
+  WebSearchTool: agents.WebSearchTool
+  Window: aiogram_dialog.Window
+
+functions:
+  __init__:
+    type: sync
+    module: database.repositories.utils
+    args: [self, session]
+  _escape_comment:
+    type: sync
+    module: bot.utils.send_answer
+    args: [m]
+  add_context:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, role, content]
+  add_file_to_memory:
+    type: async
+    module: bot.utils.funcs_gpt
+    args: [user_repo, user, file_name, file_bytes, mem_type]
+  add_knowledge_vectore_store_id:
+    type: async
+    module: database.repositories.utils
+    args: [self, vectore_store_id]
+  add_memory_vector:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, vector_store_id]
+  add_payment:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, amount, crypto_amount, crypto_currency, random_suffix]
+  add_task:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id]
+  add_user_credits:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, balance_credits]
+  add_wallet_key:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, key]
+  calculate_tokens:
+    type: async
+    module: bot.utils.calculate_tokens
+    args: [user_repo, user, input_tokens_text, output_tokens_text, input_tokens_img, output_tokens_img]
+  check_payment:
+    type: async
+    module: bot.routers.user
+    args: [callback, user_repo, utils_repo, user, solana_client, i18n]
+  check_payment_suffix:
+    type: async
+    module: database.repositories.utils
+    args: [self, suffix]
+  close:
+    type: async
+    module: bot.routers.user
+    args: [callback, utils_repo, state, i18n]
+  close_open_tags:
+    type: sync
+    module: bot.utils.send_answer
+    params:
+      returns: str
+  close_text:
+    type: sync
+    module: bot.keyboards.inline
+    args: [text]
+  cmd_delete:
+    type: async
+    module: bot.routers.user
+    args: [message, state, dialog_manager]
+  cmd_help:
+    type: async
+    module: bot.routers.user
+    args: [message, state, i18n]
+  cmd_new:
+    type: async
+    module: bot.routers.user
+    args: [message, dialog_manager, state]
+  cmd_save:
+    type: async
+    module: bot.routers.user
+    args: [message, state, dialog_manager]
+  cmd_settings:
+    type: async
+    module: bot.routers.user
+    args: [message, dialog_manager, state]
+  create_if_not_exists:
+    type: async
+    module: database.repositories.user
+    args: [self, telegram_id]
+  create_main_agent:
+    type: async
+    module: modes.crypto_mode.agents_
+    args: [user_id, mcp_server_1, knowledge_id, user_memory_id, private_key]
+  create_tables:
+    type: async
+    module: database.models
+  create_task_tool:
+    type: tool
+    module: bot.agents_tools.tools
+    args: [ctx, description, agent_message, schedule_type, time_str, date_str, interval_minutes]
+    params:
+      returns: str
+  create_vectore_store:
+    type: async
+    module: bot.utils.funcs_gpt
+    args: [user_repo, user]
+  delete_chat_messages:
+    type: async
+    module: database.repositories.user
+    args: [self, user]
+  delete_knowledge_base:
+    type: async
+    module: bot.utils.funcs_gpt
+    args: [utils_repo]
+  delete_knowledge_vectore_store_id:
+    type: async
+    module: database.repositories.utils
+    args: [self]
+  delete_memory_vector:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id]
+  delete_task:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, task_id]
+  delete_task_tool:
+    type: tool
+    module: bot.agents_tools.tools
+    args: [ctx, task_id]
+    params:
+      returns: str
+  delete_user_memory:
+    type: async
+    module: bot.utils.funcs_gpt
+    args: [user_repo, user]
+  delete_wallet_key:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id]
+  encode_image:
+    type: async
+    module: bot.utils.agent_requests
+    args: [image_path]
+  escape_tag_text:
+    type: sync
+    module: bot.utils.send_answer
+    args: [tag_text]
+    params:
+      returns: str
+  execute_task:
+    type: async
+    module: bot.utils.executed_tasks
+    args: [user_id, task_id]
+  file_to_context:
+    type: async
+    module: bot.utils.funcs_gpt
+    args: [utils_repo, file_name, file_bytes, mem_type]
+  get_all_tasks:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id]
+  get_bot:
+    type: sync
+    module: bot.utils.create_bot
+    args: [token]
+    params:
+      returns: Bot
+  get_by_telegram_id:
+    type: async
+    module: database.repositories.user
+    args: [self, telegram_id]
+  get_dexpapirka_server:
+    type: async
+    module: bot.agents_tools.mcp_servers
+  get_jupiter_server:
+    type: async
+    module: bot.agents_tools.mcp_servers
+    args: [private_key, user_id]
+  get_knowledge_vectore_store_id:
+    type: async
+    module: database.repositories.utils
+    args: [self]
+  get_memory_vector:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id]
+  get_messags:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id]
+  get_payment:
+    type: async
+    module: database.repositories.utils
+    args: [self, payment_id]
+    params:
+      returns: Payment
+  get_row_for_md:
+    type: async
+    module: database.repositories.user
+    args: [self, row_id]
+  get_scheduler:
+    type: sync
+    module: bot.utils.scheduler_provider
+    params:
+      returns: AsyncIOScheduler
+  get_task:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, task_id]
+  get_task_details_tool:
+    type: tool
+    module: bot.agents_tools.tools
+    args: [ctx, task_id]
+    params:
+      returns: str
+  get_token:
+    type: async
+    module: database.repositories.utils
+    args: [self]
+  get_wallet:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id]
+  i18n_factory:
+    type: sync
+    module: I18N.factory
+    params:
+      returns: TranslatorHub
+  image_gen_tool:
+    type: tool
+    module: bot.agents_tools.tools
+    args: [wrapper, prompt]
+    params:
+      returns: str
+  image_request:
+    type: async
+    module: bot.utils.agent_requests
+    args: [image_bytes, user, user_repo, utils_repo, redis, mcp_server_1, bot, scheduler, caption]
+  input_document:
+    type: async
+    module: bot.routers.user
+    args: [message, user_repo, utils_repo, redis, user, i18n, mcp_server, scheduler]
+  input_voice:
+    type: async
+    module: bot.routers.user
+    args: [message, user_repo, utils_repo, redis, user, i18n, mcp_server, scheduler]
+  is_self_closing:
+    type: sync
+    module: bot.utils.send_answer
+    args: [tag_name, tag_full]
+    params:
+      returns: bool
+  keyboard_md:
+    type: sync
+    module: bot.keyboards.inline
+    args: [row_id, text]
+  list_tasks_tool:
+    type: tool
+    module: bot.agents_tools.tools
+    args: [ctx]
+    params:
+      returns: str
+  main:
+    type: async
+    module: bot.main
+  md_answer:
+    type: async
+    module: bot.routers.user
+    args: [callback, user_repo, user, i18n, bot]
+  on_approve_delete:
+    type: async
+    module: bot.dialogs.menu
+    args: [callback, widget, manager]
+  on_approve_new:
+    type: async
+    module: bot.dialogs.menu
+    args: [callback, widget, manager]
+  on_approve_save:
+    type: async
+    module: bot.dialogs.menu
+    args: [callback, widget, manager]
+  on_cancel_knowledge:
+    type: async
+    module: bot.dialogs.knowledge
+    args: [callback, widget, manager]
+  on_cancel_menu:
+    type: async
+    module: bot.dialogs.menu
+    args: [callback, widget, manager]
+  on_delete_knowledge_base:
+    type: async
+    module: bot.dialogs.knowledge
+    args: [callback, widget, manager]
+  on_input_file:
+    type: async
+    module: bot.dialogs.knowledge
+    args: [message, widget, manager]
+  on_startup:
+    type: async
+    module: bot.main
+  photo_input:
+    type: async
+    module: bot.routers.user
+    args: [message, user_repo, utils_repo, redis, user, i18n, mcp_server, scheduler]
+  process_after_photo:
+    type: async
+    module: bot.utils.send_answer
+    args: [message, user, user_repo, utils_repo, redis, i18n, mess_to_delete, mcp_server_1, scheduler]
+  process_after_text:
+    type: async
+    module: bot.utils.send_answer
+    args: [message, user, user_repo, utils_repo, redis, i18n, mess_to_delete, mcp_server_1, scheduler, text_from_voice, constant_text]
+  reopen_tags:
+    type: sync
+    module: bot.utils.send_answer
+    params:
+      returns: str
+  return_vectors:
+    type: async
+    module: bot.utils.agent_requests
+    args: [user_id, user_repo, utils_repo]
+  safe_cut_index:
+    type: sync
+    module: bot.utils.send_answer
+    args: [text_, start, tentative_end]
+    params:
+      returns: int
+  save_user_context_txt_file:
+    type: async
+    module: bot.utils.funcs_gpt
+    args: [user_repo, user]
+  select_language:
+    type: async
+    module: bot.routers.user
+    args: [callback, user_repo, user, i18n, _translator_hub]
+  send_answer_photo:
+    type: async
+    module: bot.utils.send_answer
+    args: [message, answer, user, user_repo]
+  send_answer_text:
+    type: async
+    module: bot.utils.send_answer
+    args: [user_ques, message, answer, user, user_repo, i18n]
+  send_raw_response:
+    type: async
+    module: bot.utils.agent_requests
+    args: [bot, raw_response]
+  set_scheduler:
+    type: sync
+    module: bot.utils.scheduler_provider
+    args: [s]
+    params:
+      returns: None
+  split_code_message:
+    type: sync
+    module: bot.utils.send_answer
+    args: [text, type_]
+  start:
+    type: async
+    module: bot.routers.user
+    args: [message, user_repo, state, user, i18n]
+  text_input:
+    type: async
+    module: bot.routers.user
+    args: [message, user_repo, utils_repo, redis, user, i18n, mcp_server, scheduler]
+  text_request:
+    type: async
+    module: bot.utils.agent_requests
+    args: [text, user, user_repo, utils_repo, redis, mcp_server_1, bot, scheduler]
+  to_add_file:
+    type: async
+    module: bot.dialogs.knowledge
+    args: [callback, widget, manager]
+  transcribe_audio:
+    type: async
+    module: bot.utils.funcs_gpt
+    args: [bytes_audio]
+  update:
+    type: async
+    module: database.repositories.user
+    args: [self, user]
+  update_payment_status:
+    type: async
+    module: database.repositories.utils
+    args: [self, payment_id, status]
+  update_task:
+    type: async
+    module: database.repositories.user
+    args: [self, user_id, task_id]
+  update_task_tool:
+    type: tool
+    module: bot.agents_tools.tools
+    args: [ctx, task_id, description, agent_message, schedule_type, time_str, date_str, interval_minutes, is_active]
+    params:
+      returns: str
+  update_token_price:
+    type: async
+    module: database.repositories.utils
+    args: [self, price]
+  update_tokens_daily:
+    type: async
+    module: database.repositories.utils
+    args: [self]
+
+variables:
+  API_KEY_OPENAI:
+    type: env
+    params:
+      caller: [os.getenv, AsyncOpenAI]
+      path: [bot.agents_tools.agents_, modes.crypto_mode.agents_]
+  DATABASE_URL:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [bot.main, database.models]
+  REDIS_URL:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [redis_service.connect]
+  TELEGRAM_BOT_TOKEN:
+    type: env
+    params:
+      caller: [os.getenv, get_bot]
+      path: [bot.utils.create_bot]
+
+files:
+  image_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [aiofiles.open, os.remove]
