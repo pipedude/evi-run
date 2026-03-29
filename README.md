@@ -511,17 +511,11 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## 👽 Community and Support
 
-- **Website**: [evi.run](https://evi.run)
-- **Contact**: [Alex Flash](https://t.me/playa3000)
-- **Community**: [Telegram Group](https://t.me/evi_run)
-- **X (Twitter)**: [alexflash99](https://x.com/alexflash99)
-- **Reddit**: [Alex Flash](https://www.reddit.com/user/Worth_Professor_425/)
-
 ---
 
 <div align="center">
 
-**Made with ❤️ by the evi-run team**
+**Made with ❤️ for you**
 
 ⭐ **Star this repository if evi-run helped you build amazing AI experiences!** ⭐
 
