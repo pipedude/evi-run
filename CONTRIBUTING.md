@@ -92,7 +92,6 @@ python -m pytest --cov=bot
 
 - **Issues**: [GitHub Issues](https://github.com/pipedude/evi-run/issues)
 - **Telegram**: [@playa3000](https://t.me/playa3000)
-- **Community**: [Telegram Support Group](https://t.me/evi_run)
 
 ---
 
